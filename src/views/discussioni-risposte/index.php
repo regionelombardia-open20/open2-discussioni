@@ -1,21 +1,22 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-use lispa\amos\core\views\AmosGridView;
-use lispa\amos\discussioni\AmosDiscussioni;
+use open20\amos\core\views\AmosGridView;
+use open20\amos\core\utilities\ViewUtility;
+use open20\amos\discussioni\AmosDiscussioni;
 
 /**
  * @var yii\web\View $this
  * @var yii\data\ActiveDataProvider $dataProvider
- * @var lispa\amos\discussioni\models\search\DiscussioniRisposteSearch $searchModel
+ * @var open20\amos\discussioni\models\search\DiscussioniRisposteSearch $searchModel
  */
 
 $this->title = AmosDiscussioni::t('amosdiscussioni', 'Discussioni Risposte');
@@ -33,12 +34,10 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'testo:ntext',
             'discussioni_topic_id',
-            ['attribute' => 'created_at', 'format' => ['datetime', (isset(Yii::$app->modules['datecontrol']['displaySettings']['datetime'])) ? Yii::$app->modules['datecontrol']['displaySettings']['datetime'] : 'd-m-Y H:i:s A']],
-            ['attribute' => 'updated_at', 'format' => ['datetime', (isset(Yii::$app->modules['datecontrol']['displaySettings']['datetime'])) ? Yii::$app->modules['datecontrol']['displaySettings']['datetime'] : 'd-m-Y H:i:s A']],
+            ['attribute' => 'created_at', 'format' => ['datetime', ViewUtility::formatDateTime()]],
+            ['attribute' => 'updated_at', 'format' => ['datetime', ViewUtility::formatDateTime()]],
 
-            [
-                'class' => 'lispa\amos\core\views\grid\ActionColumn',
-            ],
+            ['class' => 'open20\amos\core\views\grid\ActionColumn',],
         ],
     ]); ?>
 

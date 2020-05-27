@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\models\base;
+namespace open20\amos\discussioni\models\base;
 
-use lispa\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\AmosDiscussioni;
 
 /**
  * Class DiscussioniCommenti
@@ -28,11 +28,11 @@ use lispa\amos\discussioni\AmosDiscussioni;
  * @property integer $deleted_by
  * @property integer $version
  *
- * @property \lispa\amos\discussioni\models\DiscussioniRisposte $discussioniRisposte
- * @package lispa\amos\discussioni\models\base
+ * @property \open20\amos\discussioni\models\DiscussioniRisposte $discussioniRisposte
+ * @package open20\amos\discussioni\models\base
  * @deprecated from version 1.5.
  */
-class DiscussioniCommenti extends \lispa\amos\core\record\Record
+class DiscussioniCommenti extends \open20\amos\core\record\Record
 {
     /**
      * @inheritdoc

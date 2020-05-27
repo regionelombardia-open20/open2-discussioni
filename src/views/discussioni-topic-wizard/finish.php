@@ -1,20 +1,20 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\views\discussioni-topic-wizard
+ * @package    open20\amos\discussioni\views\discussioni-topic-wizard
  * @category   CategoryName
  */
 
-use lispa\amos\core\forms\WizardPrevAndContinueButtonWidget;
-use lispa\amos\discussioni\AmosDiscussioni;
+use open20\amos\core\forms\WizardPrevAndContinueButtonWidget;
+use open20\amos\discussioni\AmosDiscussioni;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\discussioni\models\DiscussioniTopic $model
+ * @var open20\amos\discussioni\models\DiscussioniTopic $model
  * @var string $finishMessage
  */
 
@@ -26,7 +26,7 @@ $this->title = $model;
     <div class="col-xs-12">
         <div class="pull-left">
             <div class="like-widget-img color-primary ">
-                <?= \lispa\amos\core\icons\AmosIcons::show('comment', [], 'dash'); ?>
+                <?= \open20\amos\core\icons\AmosIcons::show('comment', [], 'dash'); ?>
             </div>
         </div>
         <div class="text-wrapper">

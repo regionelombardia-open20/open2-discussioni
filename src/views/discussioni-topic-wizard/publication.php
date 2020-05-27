@@ -1,26 +1,26 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\views\discussioni-topic-wizard
+ * @package    open20\amos\discussioni\views\discussioni-topic-wizard
  * @category   CategoryName
  */
 
-use lispa\amos\core\forms\ActiveForm;
-use lispa\amos\core\forms\WizardPrevAndContinueButtonWidget;
-use lispa\amos\discussioni\AmosDiscussioni;
+use open20\amos\core\forms\ActiveForm;
+use open20\amos\core\forms\WizardPrevAndContinueButtonWidget;
+use open20\amos\discussioni\AmosDiscussioni;
 use yii\base\Widget;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\discussioni\models\DiscussioniTopic $model
+ * @var open20\amos\discussioni\models\DiscussioniTopic $model
  * @var yii\widgets\ActiveForm $form
  */
 
-$this->title = \lispa\amos\discussioni\AmosDiscussioni::t('amosdiscussioni', '#discussions_wizard_page_title');
+$this->title = \open20\amos\discussioni\AmosDiscussioni::t('amosdiscussioni', '#discussions_wizard_page_title');
 
 ?>
 
@@ -39,8 +39,8 @@ $this->title = \lispa\amos\discussioni\AmosDiscussioni::t('amosdiscussioni', '#d
             <div class="col-xs-12">
                 <?php $moduleCwh = Yii::$app->getModule('cwh'); ?>
                 <?php if (isset($moduleCwh) && in_array(get_class($model), $moduleCwh->modelsEnabled) && $moduleCwh->behaviors): ?>
-                    <?php /**@var \lispa\amos\cwh\AmosCwh $moduleCwh */ ?>
-                    <?= Yii::$app->controller->renderFile('@vendor/lispa/amos-cwh/src/views/pubblicazione/cwh.php', [
+                    <?php /**@var \open20\amos\cwh\AmosCwh $moduleCwh */ ?>
+                    <?= Yii::$app->controller->renderFile('@vendor/open20/amos-cwh/src/views/pubblicazione/cwh.php', [
                         'model' => $model,
                         'form' => Widget::$stack[0]
                     ]); ?>
@@ -51,8 +51,8 @@ $this->title = \lispa\amos\discussioni\AmosDiscussioni::t('amosdiscussioni', '#d
             <div class="col-xs-12">
                 <?php $moduleTag = Yii::$app->getModule('tag'); ?>
                 <?php if (isset($moduleTag) && in_array(get_class($model), $moduleTag->modelsEnabled) && $moduleTag->behaviors): ?>
-                    <?php /**@var \lispa\amos\tag\AmosTag $moduleTag */ ?>
-                    <?= \lispa\amos\tag\widgets\TagWidget::widget([
+                    <?php /**@var \open20\amos\tag\AmosTag $moduleTag */ ?>
+                    <?= \open20\amos\tag\widgets\TagWidget::widget([
                         'model' => $model,
                         'attribute' => 'tagValues',
                         'form' => Widget::$stack[0]

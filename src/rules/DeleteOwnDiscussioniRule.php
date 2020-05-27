@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\rules;
+namespace open20\amos\discussioni\rules;
 
-use lispa\amos\core\rules\DefaultOwnContentRule;
-use lispa\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\core\rules\DefaultOwnContentRule;
+use open20\amos\discussioni\models\DiscussioniTopic;
 
 class DeleteOwnDiscussioniRule extends DefaultOwnContentRule
 {

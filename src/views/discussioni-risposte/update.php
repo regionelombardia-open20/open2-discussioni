@@ -1,20 +1,20 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\discussioni\models\DiscussioniRisposte $model
+ * @var open20\amos\discussioni\models\DiscussioniRisposte $model
  */
 
-use lispa\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\AmosDiscussioni;
 
 $this->title = AmosDiscussioni::t('amosdiscussioni', 'Update {modelClass}: ', ['modelClass' => 'Discussioni Risposta',]) . ' ' . $model->id;
 $this->params['breadcrumbs'][] = ['label' => AmosDiscussioni::t('amosdiscussioni', 'Discussioni Risposta'), 'url' => ['index']];

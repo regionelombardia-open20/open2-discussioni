@@ -1,23 +1,23 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\controllers
+ * @package    open20\amos\discussioni\controllers
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\controllers;
+namespace open20\amos\discussioni\controllers;
 
-use lispa\amos\core\behaviors\TaggableBehavior;
-use lispa\amos\core\controllers\CrudController;
-use lispa\amos\core\module\BaseAmosModule;
-use lispa\amos\discussioni\AmosDiscussioni;
-use lispa\amos\discussioni\components\PartsWizardDiscussioniTopicCreation;
-use lispa\amos\discussioni\models\DiscussioniTopic;
-use lispa\amos\discussioni\models\search\DiscussioniTopicSearch;
+use open20\amos\core\behaviors\TaggableBehavior;
+use open20\amos\core\controllers\CrudController;
+use open20\amos\core\module\BaseAmosModule;
+use open20\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\components\PartsWizardDiscussioniTopicCreation;
+use open20\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\discussioni\models\search\DiscussioniTopicSearch;
 use Yii;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
@@ -27,9 +27,9 @@ use yii\helpers\Url;
 /**
  * Class DiscussioniTopicWizardController
  *
- * @property \lispa\amos\discussioni\models\DiscussioniTopic $model
+ * @property \open20\amos\discussioni\models\DiscussioniTopic $model
  *
- * @package lispa\amos\discussioni\controllers
+ * @package open20\amos\discussioni\controllers
  */
 class DiscussioniTopicWizardController extends CrudController
 {
@@ -306,7 +306,7 @@ class DiscussioniTopicWizardController extends CrudController
         $module = \Yii::$app->getModule('layout');
         if (empty($module)) {
             if (strpos($this->layout, '@') === false) {
-                $this->layout = '@vendor/lispa/amos-core/views/layouts/'.(!empty($layout) ? $layout : $this->layout);
+                $this->layout = '@vendor/open20/amos-core/views/layouts/'.(!empty($layout) ? $layout : $this->layout);
             }
             return true;
         }

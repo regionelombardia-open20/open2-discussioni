@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\models\base;
+namespace open20\amos\discussioni\models\base;
 
-use lispa\amos\discussioni\AmosDiscussioni;
-use lispa\amos\notificationmanager\record\NotifyRecord;
+use open20\amos\discussioni\AmosDiscussioni;
+use open20\amos\notificationmanager\record\NotifyRecord;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -36,11 +36,12 @@ use yii\helpers\ArrayHelper;
  * @property integer $updated_by
  * @property integer $deleted_by
  * @property integer $version
+ * @property integer $close_comment_thread
  *
- * @property \lispa\amos\discussioni\models\DiscussioniRisposte[] $discussioniRisposte
- * @property \lispa\amos\comments\models\Comment[] $discussionComments
+ * @property \open20\amos\discussioni\models\DiscussioniRisposte[] $discussioniRisposte
+ * @property \open20\amos\comments\models\Comment[] $discussionComments
  */
-abstract class DiscussioniTopic extends \lispa\amos\core\record\ContentModel
+abstract class DiscussioniTopic extends \open20\amos\core\record\ContentModel
 {
     /**
      * @inheritdoc
@@ -59,7 +60,7 @@ abstract class DiscussioniTopic extends \lispa\amos\core\record\ContentModel
             [['testo'], 'string'],
             [['titolo', 'status'], 'required'],
             [['primo_piano','in_evidenza', 'hints', 'created_by', 'updated_by', 'deleted_by', 'version', 'image_id'], 'integer'],
-            [['slug', 'created_at', 'updated_at', 'deleted_at', 'status'], 'safe'],
+            [['slug', 'close_comment_thread', 'created_at', 'updated_at', 'deleted_at', 'status'], 'safe'],
             [['titolo'], 'string', 'max' => 255]
         ];
     }
@@ -96,7 +97,7 @@ abstract class DiscussioniTopic extends \lispa\amos\core\record\ContentModel
      */
     public function getDiscussioniRisposte()
     {
-        return $this->hasMany(\lispa\amos\discussioni\models\DiscussioniRisposte::className(), ['discussioni_topic_id' => 'id']);
+        return $this->hasMany(\open20\amos\discussioni\models\DiscussioniRisposte::className(), ['discussioni_topic_id' => 'id']);
     }
     
     /**
@@ -104,7 +105,7 @@ abstract class DiscussioniTopic extends \lispa\amos\core\record\ContentModel
      */
     public function getDiscussionComments()
     {
-        return $this->hasMany(\lispa\amos\comments\models\Comment::className(), ['context_id' => 'id'])
-            ->andWhere(['context' => \lispa\amos\discussioni\models\DiscussioniTopic::className()]);
+        return $this->hasMany(\open20\amos\comments\models\Comment::className(), ['context_id' => 'id'])
+            ->andWhere(['context' => \open20\amos\discussioni\models\DiscussioniTopic::className()]);
     }
 }

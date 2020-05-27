@@ -1,7 +1,16 @@
 <?php
 
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
 use yii\db\Migration;
-use lispa\amos\core\migration\AmosMigrationPermissions;
+use open20\amos\core\migration\AmosMigrationPermissions;
 use yii\rbac\Permission;
 
 class m171117_134020_add_discussioni_permission_admin_all_widget extends AmosMigrationPermissions
@@ -10,7 +19,7 @@ class m171117_134020_add_discussioni_permission_admin_all_widget extends AmosMig
     {
         $this->authorizations = [
             [
-                'name' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAdminAll::className(),
+                'name' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAdminAll::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permission description',
                 'ruleName' => null,

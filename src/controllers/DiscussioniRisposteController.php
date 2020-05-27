@@ -1,22 +1,22 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\controllers;
+namespace open20\amos\discussioni\controllers;
 
-use lispa\amos\core\controllers\CrudController;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\icons\AmosIcons;
-use lispa\amos\discussioni\AmosDiscussioni;
-use lispa\amos\discussioni\models\DiscussioniRisposte;
-use lispa\amos\discussioni\models\search\DiscussioniRisposteSearch;
+use open20\amos\core\controllers\CrudController;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\models\DiscussioniRisposte;
+use open20\amos\discussioni\models\search\DiscussioniRisposteSearch;
 use Yii;
 use yii\helpers\Url;
 use yii\web\NotFoundHttpException;
@@ -24,7 +24,7 @@ use yii\web\NotFoundHttpException;
 /**
  * Class DiscussioniRisposteController
  * DiscussioniRisposteController implements the CRUD actions for DiscussioniRisposte model.
- * @package lispa\amos\discussioni\controllers
+ * @package open20\amos\discussioni\controllers
  * @deprecated from version 1.5.
  */
 class DiscussioniRisposteController extends CrudController
@@ -179,7 +179,7 @@ class DiscussioniRisposteController extends CrudController
         $module = \Yii::$app->getModule('layout');
         if (empty($module)) {
             if (strpos($this->layout, '@') === false) {
-                $this->layout = '@vendor/lispa/amos-core/views/layouts/'.(!empty($layout) ? $layout : $this->layout);
+                $this->layout = '@vendor/open20/amos-core/views/layouts/'.(!empty($layout) ? $layout : $this->layout);
             }
             return true;
         }

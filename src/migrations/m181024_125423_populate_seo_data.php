@@ -1,7 +1,16 @@
 <?php
 
-use lispa\amos\discussioni\models\DiscussioniTopic;
-use lispa\amos\seo\models\SeoData;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
+use open20\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\seo\models\SeoData;
 use yii\db\Migration;
 
 /**

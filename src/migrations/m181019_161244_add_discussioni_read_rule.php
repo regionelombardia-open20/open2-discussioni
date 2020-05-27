@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\news\migrations
+ * @package    open20\amos\news\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\core\migration\AmosMigrationPermissions;
+use open20\amos\core\migration\AmosMigrationPermissions;
 use yii\rbac\Permission;
 
 /**
@@ -27,7 +27,7 @@ class m181019_161244_add_discussioni_read_rule extends AmosMigrationPermissions
                 'name' => 'DscussionRead',
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permission to read a News ',
-                'ruleName' => \lispa\amos\core\rules\ReadContentRule::className(),
+                'ruleName' => \open20\amos\core\rules\ReadContentRule::className(),
                 'parent' => ['AMMINISTRATORE_DISCUSSIONI', 'CREATORE_DISCUSSIONI', 'VALIDATORE_DISCUSSIONI', 'LETTORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI']
             ],
             [

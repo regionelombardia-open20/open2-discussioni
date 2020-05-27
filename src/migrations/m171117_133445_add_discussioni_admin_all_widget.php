@@ -1,7 +1,16 @@
 <?php
 
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
 use yii\db\Migration;
-use lispa\amos\dashboard\models\AmosWidgets;
+use open20\amos\dashboard\models\AmosWidgets;
 
 class m171117_133445_add_discussioni_admin_all_widget extends Migration
 {
@@ -12,11 +21,11 @@ class m171117_133445_add_discussioni_admin_all_widget extends Migration
     {
         $this->widgets = [
             [
-                'classname' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAdminAll::className(),
+                'classname' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAdminAll::className(),
                 'type' => AmosWidgets::TYPE_ICON,
                 'module' => self::MODULE_NAME,
                 'status' => AmosWidgets::STATUS_ENABLED,
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
                 'default_order' => 80
             ],
 

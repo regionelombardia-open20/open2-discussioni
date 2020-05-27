@@ -1,28 +1,29 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\models;
+namespace open20\amos\discussioni\models;
 
-use lispa\amos\discussioni\models\base\DiscussioniRisposte as DiscussioniRisposteBase;
+use open20\amos\discussioni\models\base\DiscussioniRisposte as DiscussioniRisposteBase;
 use yii\db\BaseActiveRecord;
 
 /**
  * Class DiscussioniRisposte
  * This is the model class for table "discussioni_risposte".
- * @package lispa\amos\discussioni\models
+ * @package open20\amos\discussioni\models
  * @deprecated from version 1.5.
  */
 class DiscussioniRisposte extends DiscussioniRisposteBase
 {
     /**
+     * @see BaseActiveRecord::afterSave()
      *
      * @param bool $insert
      * @param array $changedAttributes

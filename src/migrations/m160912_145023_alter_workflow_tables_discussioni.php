@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\migrations
+ * @package    open20\amos\discussioni\migrations
  * @category   CategoryName
  */
 
@@ -56,6 +56,7 @@ class m160912_145023_alter_workflow_tables_discussioni extends Migration
     
     /**
      * Use this instead of function down().
+     * @see \Yii\db\Migration::safeDown() for more info.
      */
     public function safeDown()
     {

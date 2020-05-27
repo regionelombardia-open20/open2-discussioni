@@ -1,20 +1,24 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\widgets\icons;
+namespace open20\amos\discussioni\widgets\icons;
 
-use lispa\amos\core\widget\WidgetIcon;
-use lispa\amos\discussioni\AmosDiscussioni;
-use lispa\amos\discussioni\models\DiscussioniTopic;
-use lispa\amos\discussioni\models\search\DiscussioniTopicSearch;
+use open20\amos\core\widget\WidgetIcon;
+use open20\amos\core\widget\WidgetAbstract;
+use open20\amos\core\icons\AmosIcons;
+
+use open20\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\discussioni\models\search\DiscussioniTopicSearch;
+
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\Application as Web;
@@ -24,10 +28,11 @@ use yii\web\Application as Web;
  * This widget can appear on dashboard. This class is used for creation and general configuration.
  * widget that link to the discussion topic of the logged user
  *
- * @package lispa\amos\discussioni\widgets\icons
+ * @package open20\amos\discussioni\widgets\icons
  */
 class WidgetIconDiscussioniTopicAdminAll extends WidgetIcon
 {
+
     /**
      * Init of the class, set of general configurations
      */
@@ -35,42 +40,57 @@ class WidgetIconDiscussioniTopicAdminAll extends WidgetIcon
     {
         parent::init();
 
+        $paramsClassSpan = [
+            'bk-backgroundIcon',
+            'color-primary'
+        ];
+
         $this->setLabel(AmosDiscussioni::tHtml('amosdiscussioni', 'Amministra discussioni'));
         $this->setDescription(AmosDiscussioni::t('amosdiscussioni', 'Elenco di tutte le discussioni'));
-        $this->setIcon('comment');
+
+        if (!empty(Yii::$app->params['dashboardEngine']) && Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
+            $this->setIconFramework(AmosIcons::IC);
+            $this->setIcon('disc');
+            $paramsClassSpan = [];
+        } else {
+            $this->setIcon('comment');
+        }
+
         $this->setUrl(['/discussioni/discussioni-topic/admin-all-discussions']);
         $this->setCode('ADMIN-DISCUSSIONI_TOPIC_ALL');
         $this->setModuleName('discussioni');
         $this->setNamespace(__CLASS__);
 
+        $this->setClassSpan(
+            ArrayHelper::merge(
+                $this->getClassSpan(),
+                $paramsClassSpan
+            )
+        );
 
         if (Yii::$app instanceof Web) {
             $search = new DiscussioniTopicSearch();
-            $notifier = \Yii::$app->getModule('notify');
-            $count = 0;
-            if ($notifier) {
-                $count = $notifier->countNotRead(\Yii::$app->getUser()->id, DiscussioniTopic::className(),
-                    $search->buildQuery('admin-all', []));
-            }
-            $this->setBulletCount($count);
+
+            $this->setBulletCount(
+                $this->makeBulletCounter(
+                    Yii::$app->getUser()->getId(),
+                    DiscussioniTopic::className(),
+                    $search->buildQuery('admin-all', [])
+                )
+            );
         }
-
-
-        $this->setClassSpan(ArrayHelper::merge($this->getClassSpan(), [
-            'bk-backgroundIcon',
-            'color-primary'
-        ]));
-
     }
 
     /**
-     * all widgets added to the container object retrieved from the module controller
+     * All widgets added to the container object retrieved from the module controller
      * @return array
      */
     public function getOptions()
     {
-        $options = parent::getOptions();
-        return ArrayHelper::merge($options, ["children" => $this->getWidgetsIcon()]);
+        return ArrayHelper::merge(
+            parent::getOptions(),
+            ['children' => $this->getWidgetsIcon()]
+        );
     }
 
     /**
@@ -87,4 +107,5 @@ class WidgetIconDiscussioniTopicAdminAll extends WidgetIcon
 
         return $widgets;
     }
+
 }

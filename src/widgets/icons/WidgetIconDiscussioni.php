@@ -1,21 +1,23 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\widgets\icons;
+namespace open20\amos\discussioni\widgets\icons;
 
-use lispa\amos\core\widget\WidgetIcon;
-use lispa\amos\dashboard\models\AmosUserDashboards;
-use lispa\amos\dashboard\models\AmosUserDashboardsWidgetMm;
-use lispa\amos\dashboard\models\AmosWidgets;
-use lispa\amos\discussioni\AmosDiscussioni;
+use open20\amos\core\widget\WidgetIcon;
+use open20\amos\core\widget\WidgetAbstract;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\dashboard\models\AmosUserDashboards;
+use open20\amos\dashboard\models\AmosUserDashboardsWidgetMm;
+use open20\amos\dashboard\models\AmosWidgets;
+use open20\amos\discussioni\AmosDiscussioni;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\Application as Web;
@@ -25,63 +27,109 @@ use yii\web\Application as Web;
  * This widget can appear on dashboard. This class is used for creation and general configuration.
  * widget that link to the discussion dashboard
  * @deprecated
- * @package lispa\amos\discussioni\widgets\icons
+ * @package open20\amos\discussioni\widgets\icons
  */
 class WidgetIconDiscussioni extends WidgetIcon
 {
+
     /**
      * Init of the class, set of general configurations
      */
     public function init()
     {
         parent::init();
+
+        $paramsClassSpan = [
+            'bk-backgroundIcon',
+            'color-primary'
+        ];
+
         $this->setLabel(AmosDiscussioni::tHtml('amosdiscussioni', 'Discussioni'));
         $this->setDescription(AmosDiscussioni::t('amosdiscussioni', 'Modulo discussioni'));
-        $this->setIcon('comment');
+
+        if (!empty(Yii::$app->params['dashboardEngine']) && Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
+            $this->setIconFramework(AmosIcons::IC);
+            $this->setIcon('disc');
+            $paramsClassSpan = [];
+        } else {
+            $this->setIcon('comment');
+        }
+
         $this->setUrl(['/discussioni']);
         $this->setCode('DISCUSSIONI_MODULE_001');
         $this->setModuleName('discussioni-dashboard');
         $this->setNamespace(__CLASS__);
+
+        $this->setClassSpan(
+            ArrayHelper::merge(
+                $this->getClassSpan(),
+                $paramsClassSpan
+            )
+        );
+
         if (Yii::$app instanceof Web) {
-            $this->setBulletCount($this->getBulletCountChildWidgets());
+            $this->setBulletCount(
+                $this->makeBulletCounter(
+                    Yii::$app->getUser()->getId()
+                )
+            );
         }
-        $this->setClassSpan(ArrayHelper::merge($this->getClassSpan(), [
-            'bk-backgroundIcon',
-            'color-primary'
-        ]));
     }
 
+    /**
+     * 
+     * @param type $userId
+     * @param type $className
+     * @param type $externalQuery
+     * @return type
+     */
+    public function makeBulletCounter($userId = null, $className = null, $externalQuery = null)
+    {
+        return $this->getBulletCountChildWidgets($userId);
+    }
 
     /**
-     *
+     * 
+     * @param type $user_id
      * @return int - the sum of bulletCount internal widget
-     *
      */
-    private function getBulletCountChildWidgets()
+    private function getBulletCountChildWidgets($userId = null)
     {
         /** @var AmosUserDashboards $userModuleDashboard */
         $userModuleDashboard = AmosUserDashboards::findOne([
-            'user_id' => \Yii::$app->user->id,
+            'user_id' => $userId,
             'module' => AmosDiscussioni::getModuleName()
         ]);
-        if (is_null($userModuleDashboard)) return 0;
+
+        if (is_null($userModuleDashboard)) {
+            return 0;
+        }
 
         $listWidgetChild = $userModuleDashboard->amosUserDashboardsWidgetMms;
-        if (is_null($listWidgetChild)) return 0;
-        $count = 0;
+        if (is_null($listWidgetChild)) {
+            return 0;
+        }
+
         /** @var AmosUserDashboardsWidgetMm $widgetChild */
+        $count = 0;
+        
+        $classNames = [];
         foreach ($listWidgetChild as $widgetChild) {
             if ($widgetChild->amos_widgets_classname != $this->getNamespace()) {
-                $amosWidget = AmosWidgets::findOne(['classname' => $widgetChild->amos_widgets_classname]);
-                if ($amosWidget->type == AmosWidgets::TYPE_ICON) {
-                    $widget = \Yii::createObject($widgetChild->amos_widgets_classname);
-                    $val = $widget->getBulletCount();
-
-                    $bulletCount = empty($val) ? 0 : $val;
-                    $count = $count + $bulletCount;
-                }
+                $classNames[] = $widgetChild->amos_widgets_classname;
             }
         }
+        
+        $amosWidgets = AmosWidgets::find([
+            'classname' => $classNames,
+            'type' => AmosWidgets::TYPE_ICON
+        ]);
+        
+        foreach ($amosWidgets as $widgetChild) {
+            $widget = \Yii::createObject($widgetChild->amos_widgets_classname);
+            $count += (int)$widget->getBulletCount();
+        }
+
         return $count;
     }
 
@@ -91,8 +139,10 @@ class WidgetIconDiscussioni extends WidgetIcon
      */
     public function getOptions()
     {
-        $options = parent::getOptions();
-        return ArrayHelper::merge($options, ["children" => $this->getWidgetsIcon()]);
+        return ArrayHelper::merge(
+            parent::getOptions(),
+            ['children' => $this->getWidgetsIcon()]
+        );
     }
 
     /**
@@ -103,7 +153,6 @@ class WidgetIconDiscussioni extends WidgetIcon
         $widgets = [];
 
         $WidgetIconDiscussioniTopicc = new WidgetIconDiscussioniTopic();
-
         if ($WidgetIconDiscussioniTopicc->isVisible()) {
             $widgets[] = $WidgetIconDiscussioniTopicc->getOptions();
         }
@@ -113,7 +162,7 @@ class WidgetIconDiscussioni extends WidgetIcon
             $widgets[] = $WidgetIconDiscussioniTopicCreatedBy->getOptions();
         }
 
-
         return $widgets;
     }
+
 }

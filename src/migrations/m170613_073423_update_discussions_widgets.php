@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\migrations
+ * @package    open20\amos\discussioni\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\core\migration\AmosMigrationWidgets;
+use open20\amos\core\migration\AmosMigrationWidgets;
 
 /**
  * Class m170613_073423_update_discussions_widgets
@@ -37,23 +37,23 @@ class m170613_073423_update_discussions_widgets extends AmosMigrationWidgets
     {
         return [
             [
-                'classname' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopic::className(),
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
+                'classname' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopic::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
                 'update' => true
             ],
             [
-                'classname' => lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicCreatedBy::className(),
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
+                'classname' => open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicCreatedBy::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
                 'update' => true
             ],
             [
-                'classname' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAll::className(),
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
+                'classname' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAll::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
                 'update' => true
             ],
             [
-                'classname' => lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicDaValidare::className(),
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
+                'classname' => open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicDaValidare::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
                 'update' => true
             ]
         ];
@@ -67,13 +67,13 @@ class m170613_073423_update_discussions_widgets extends AmosMigrationWidgets
     {
         return [
             [
-                'classname' => \lispa\amos\discussioni\widgets\graphics\WidgetGraphicsDiscussioniInEvidenza::className(),
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
+                'classname' => \open20\amos\discussioni\widgets\graphics\WidgetGraphicsDiscussioniInEvidenza::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
                 'update' => true
             ],
             [
-                'classname' => \lispa\amos\discussioni\widgets\graphics\WidgetGraphicsUltimeDiscussioni::className(),
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
+                'classname' => \open20\amos\discussioni\widgets\graphics\WidgetGraphicsUltimeDiscussioni::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
                 'update' => true
             ]
         ];

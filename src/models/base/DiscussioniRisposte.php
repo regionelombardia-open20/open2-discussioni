@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\models\base;
+namespace open20\amos\discussioni\models\base;
 
-use lispa\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\AmosDiscussioni;
 
 /**
  * Class DiscussioniRisposte
@@ -28,12 +28,12 @@ use lispa\amos\discussioni\AmosDiscussioni;
  * @property integer $deleted_by
  * @property integer $version
  *
- * @property \lispa\amos\discussioni\models\DiscussioniCommenti[] $discussioniCommentis
- * @property \lispa\amos\discussioni\models\DiscussioniTopic $discussioniTopic
- * @package lispa\amos\discussioni\models\base
+ * @property \open20\amos\discussioni\models\DiscussioniCommenti[] $discussioniCommentis
+ * @property \open20\amos\discussioni\models\DiscussioniTopic $discussioniTopic
+ * @package open20\amos\discussioni\models\base
  * @deprecated from version 1.5.
  */
-class DiscussioniRisposte extends \lispa\amos\core\record\Record
+class DiscussioniRisposte extends \open20\amos\core\record\Record
 {
     /**
      * @inheritdoc
@@ -80,7 +80,7 @@ class DiscussioniRisposte extends \lispa\amos\core\record\Record
      */
     public function getDiscussioniCommentis()
     {
-        return $this->hasMany(\lispa\amos\discussioni\models\DiscussioniCommenti::className(), ['discussioni_risposte_id' => 'id']);
+        return $this->hasMany(\open20\amos\discussioni\models\DiscussioniCommenti::className(), ['discussioni_risposte_id' => 'id']);
     }
 
     /**
@@ -88,6 +88,6 @@ class DiscussioniRisposte extends \lispa\amos\core\record\Record
      */
     public function getDiscussioniTopic()
     {
-        return $this->hasOne(\lispa\amos\discussioni\models\DiscussioniTopic::className(), ['id' => 'discussioni_topic_id']);
+        return $this->hasOne(\open20\amos\discussioni\models\DiscussioniTopic::className(), ['id' => 'discussioni_topic_id']);
     }
 }

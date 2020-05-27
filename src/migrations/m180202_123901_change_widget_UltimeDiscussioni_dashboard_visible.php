@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\migrations
+ * @package    open20\amos\discussioni\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\core\migration\AmosMigrationWidgets;
+use open20\amos\core\migration\AmosMigrationWidgets;
 
 /**
  * Class m180202_123901_change_widget_UltimeDiscussioni_dashboard_visible
@@ -25,7 +25,7 @@ class m180202_123901_change_widget_UltimeDiscussioni_dashboard_visible extends A
     {
         $this->widgets = [
             [
-                'classname' => lispa\amos\discussioni\widgets\graphics\WidgetGraphicsUltimeDiscussioni::className(),
+                'classname' => open20\amos\discussioni\widgets\graphics\WidgetGraphicsUltimeDiscussioni::className(),
                 'dashboard_visible' => 1,
                 'update' => true
             ]

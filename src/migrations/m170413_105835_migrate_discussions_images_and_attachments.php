@@ -1,9 +1,18 @@
 <?php
 
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
 use yii\db\Migration;
 use yii\db\Query;
-use lispa\amos\discussioni\models\DiscussioniTopic;
-use lispa\amos\attachments\components\FileImport;
+use open20\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\attachments\components\FileImport;
 
 
 class m170413_105835_migrate_discussions_images_and_attachments extends Migration

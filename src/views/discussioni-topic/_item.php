@@ -1,27 +1,28 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-use lispa\amos\admin\widgets\UserCardWidget;
-use lispa\amos\core\forms\ContextMenuWidget;
-use lispa\amos\core\forms\ItemAndCardHeaderWidget;
-use lispa\amos\core\forms\PublishedByWidget;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\views\toolbars\StatsToolbar;
-use lispa\amos\discussioni\AmosDiscussioni;
-use lispa\amos\notificationmanager\forms\NewsWidget;
+use open20\amos\admin\widgets\UserCardWidget;
+use open20\amos\core\forms\ContextMenuWidget;
+use open20\amos\core\forms\ItemAndCardHeaderWidget;
+use open20\amos\core\forms\PublishedByWidget;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\views\toolbars\StatsToolbar;
+use open20\amos\discussioni\AmosDiscussioni;
+use open20\amos\notificationmanager\forms\NewsWidget;
 
 /**
- * @var \lispa\amos\discussioni\models\DiscussioniTopic $model
+ * @var \open20\amos\discussioni\models\DiscussioniTopic $model
  */
 
+$module = \Yii::$app->getModule('discussioni');
 ?>
 
 <div class="listview-container">
@@ -73,18 +74,18 @@ use lispa\amos\notificationmanager\forms\NewsWidget;
                     <div class="post-text">
                         <p>
                             <?php
-                            $stringNoTags = $model->testo;
+                            $stringNoTags = strip_tags($model->testo);
                             //remove table from editor
                             //$stringNoTags = preg_replace('/<table(.*?)>(.*?)<\/table>/s', '', $stringNoTags);
-                            $stringNoTags = preg_replace('/<table(.*$)/s', '', $stringNoTags);
+                      //      $stringNoTags = preg_replace('/<table(.*$)/s', '', $stringNoTags);
                             // remove iframe from editor
                             //$stringNoTags = preg_replace('/<iframe(.*?)>(.*?)<\/iframe>/s', '', $stringNoTags);
-                            $stringNoTags = preg_replace('/<iframe(.*$)/s', '', $stringNoTags);
+                      //      $stringNoTags = preg_replace('/<iframe(.*$)/s', '', $stringNoTags);
                             // remove images from editor
                             //$stringNoTags = preg_replace('/<img(.*?)\/>/s', '', $stringNoTags);
-                            $stringNoTags = preg_replace('/<p><img(.*$)/s', '', $stringNoTags);
+                      //      $stringNoTags = preg_replace('/<p><img(.*$)/s', '', $stringNoTags);
                             // remove empty paragraph
-                            $stringNoTags = preg_replace('/<p><\/p>/s', '', $stringNoTags);
+                      //      $stringNoTags = preg_replace('/<p><\/p>/s', '', $stringNoTags);
                             if (strlen($stringNoTags) > 800) {
                                 $stringCut = substr($stringNoTags, 0, 800);
                                 echo substr($stringCut, 0, strrpos($stringCut, ' ')) . '... ';
@@ -124,11 +125,12 @@ use lispa\amos\notificationmanager\forms\NewsWidget;
                 $noComments = true;
             }
             $numeroVisualizzazioni = $model->hints;
-            if (!$numeroVisualizzazioni)
+            if (!$numeroVisualizzazioni) {
                 $numeroVisualizzazioni = 0;
-
+            }
             $attributeModel = $model->getDiscussionsAttachments();
-            $numeroAllegati = count($attributeModel);
+            
+            $numeroAllegati = (is_array($attributeModel)) ? count($attributeModel) : 0;
             ?>
 
             <div class="post-footer col-xs-12 nop">
@@ -180,8 +182,8 @@ use lispa\amos\notificationmanager\forms\NewsWidget;
                     }
                     $lastComments = $model->getLastComments()->all();
                     foreach ($lastComments as $lastComment) {
-                        /** @var \lispa\amos\comments\models\Comment $lastComment */
-                        /** @var \lispa\amos\admin\models\UserProfile $lastCommentUser */
+                        /** @var \open20\amos\comments\models\Comment $lastComment */
+                        /** @var \open20\amos\admin\models\UserProfile $lastCommentUser */
                         $lastCommentUser = $model->getCommentCreatorUser($lastComment)->one();
                         ?>
                         <div class="answer nop media">
@@ -223,6 +225,20 @@ use lispa\amos\notificationmanager\forms\NewsWidget;
                     <?php } ?>
                 </div>
                 <div class="footer_sidebar text-right">
+                    <?php if ((isset($module->disableComments) && $module->disableComments) && $model->close_comment_thread): ?>
+                        <span class="closed-label">
+                            <?= AmosDiscussioni::t('amosdiscussioni', '#discussion_closed') ?>
+                        </span>
+                    
+                    <?= Html::a(
+                        AmosDiscussioni::t('amosdiscussioni', 'LEGGI'),
+                        ['partecipa', 'id' => $model->id, '#' => 'comments_contribute'],
+                        [
+                            'class' => 'btn btn-navigation-primary',
+                            'title' => AmosDiscussioni::t('amosdiscussioni', 'LEGGI')
+                        ]
+                    ) ?>
+                    <?php else: ?>
                     <?= Html::a(
                         AmosDiscussioni::t('amosdiscussioni', 'Contribuisci'),
                         ['partecipa', 'id' => $model->id, '#' => 'comments_contribute'],
@@ -231,6 +247,7 @@ use lispa\amos\notificationmanager\forms\NewsWidget;
                             'title' => AmosDiscussioni::t('amosdiscussioni', 'commenta')
                         ]
                     ) ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

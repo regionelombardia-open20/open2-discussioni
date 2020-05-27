@@ -1,14 +1,14 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
 ?>
 
-<?= \lispa\amos\discussioni\AmosDiscussioni::t('amosdiscussioni', '#discussions_description') ?>
+<?= \open20\amos\discussioni\AmosDiscussioni::t('amosdiscussioni', '#discussions_description') ?>

@@ -1,33 +1,33 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\views\discussioni-topic
+ * @package    open20\amos\discussioni\views\discussioni-topic
  * @category   CategoryName
  */
 
-use lispa\amos\admin\widgets\UserCardWidget;
-use lispa\amos\attachments\components\AttachmentsTableWithPreview;
-use lispa\amos\core\forms\ContextMenuWidget;
-use lispa\amos\core\forms\ItemAndCardHeaderWidget;
-use lispa\amos\core\forms\PublishedByWidget;
-use lispa\amos\core\forms\ShowUserTagsWidget;
-use lispa\amos\core\forms\Tabs;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\discussioni\AmosDiscussioni;
-use lispa\amos\core\views\toolbars\StatsToolbar;
-use lispa\amos\core\forms\CreatedUpdatedWidget;
-use lispa\amos\core\icons\AmosIcons;
-use lispa\amos\attachments\components\AttachmentsList;
-use lispa\amos\core\forms\InteractionMenuWidget;
-use \lispa\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\admin\widgets\UserCardWidget;
+use open20\amos\attachments\components\AttachmentsTableWithPreview;
+use open20\amos\core\forms\ContextMenuWidget;
+use open20\amos\core\forms\ItemAndCardHeaderWidget;
+use open20\amos\core\forms\PublishedByWidget;
+use open20\amos\core\forms\ShowUserTagsWidget;
+use open20\amos\core\forms\Tabs;
+use open20\amos\core\helpers\Html;
+use open20\amos\discussioni\AmosDiscussioni;
+use open20\amos\core\views\toolbars\StatsToolbar;
+use open20\amos\core\forms\CreatedUpdatedWidget;
+use open20\amos\core\icons\AmosIcons;
+use open20\amos\attachments\components\AttachmentsList;
+use open20\amos\core\forms\InteractionMenuWidget;
+use \open20\amos\discussioni\models\DiscussioniTopic;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\discussioni\models\DiscussioniTopic $model
+ * @var open20\amos\discussioni\models\DiscussioniTopic $model
  * @var yii\widgets\ActiveForm $form
  */
 
@@ -36,7 +36,7 @@ $this->params['breadcrumbs'][] = ['label' => Yii::$app->session->get('previousTi
 $this->params['breadcrumbs'][] = $model->titolo;
 
 if($model->status != DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA) {
-    echo \lispa\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget::widget([
+    echo \open20\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget::widget([
         'model' => $model,
         'workflowId' => DiscussioniTopic::DISCUSSIONI_WORKFLOW,
         'classDivMessage' => 'message',
@@ -44,6 +44,7 @@ if($model->status != DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA) {
     ]);
 }
 
+$module = \Yii::$app->getModule('discussioni');
 ?>
 
 <div class="discussioni-topic-view col-xs-12 nop">
@@ -63,7 +64,7 @@ if($model->status != DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA) {
             ]) ?>
             <?= CreatedUpdatedWidget::widget(['model' => $model, 'isTooltip' => true]) ?>
             <?=
-            \lispa\amos\report\widgets\ReportFlagWidget::widget([
+            \open20\amos\report\widgets\ReportFlagWidget::widget([
                 'model' => $model,
             ])
             ?>
@@ -92,22 +93,35 @@ if($model->status != DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA) {
             <?= $model->testo ?>
         </div>
         <div class="widget-body-content col-xs-12 nop">
-            <?= \lispa\amos\report\widgets\ReportDropdownWidget::widget([
+          <?php
+      echo \open20\amos\core\forms\editors\likeWidget\LikeWidget::widget([
+          'model' => $model,
+        ]);
+      ?>
+            <?= \open20\amos\report\widgets\ReportDropdownWidget::widget([
                 'model' => $model
             ])
             ?>
-            <?= \lispa\amos\core\forms\editors\socialShareWidget\SocialShareWidget::widget([
-                'mode' => \lispa\amos\core\forms\editors\socialShareWidget\SocialShareWidget::MODE_DROPDOWN,
+            <?php $baseUrl = (!empty(\Yii::$app->params['platform']['backendUrl']) ? \Yii::$app->params['platform']['backendUrl'] : '') ?>
+            <?= \open20\amos\core\forms\editors\socialShareWidget\SocialShareWidget::widget([
+                'mode' => \open20\amos\core\forms\editors\socialShareWidget\SocialShareWidget::MODE_DROPDOWN,
                 'configuratorId' => 'socialShare',
                 'model' => $model,
-                'url' => \yii\helpers\Url::to(\Yii::$app->params['platform']['backendUrl'] . '/discussioni/discussioni-topic/view?id=' . $model->id, true),
+                'url' => \yii\helpers\Url::to($baseUrl . '/discussioni/discussioni-topic/public?id=' . $model->id, true),
                 'title' => $model->titolo,
                 'description' => $model->getDescription(true),
 //                'imageUrl'      => !empty($model->getDiscussionsTopicImage()) ? $model->getDiscussionsTopicImage()->getWebUrl('square_small') : '',
             ]); ?>
         </div>
+        
+        <?php if ((isset($module->disableComments) && $module->disableComments) && $model->close_comment_thread): ?>
+        <div class="closed-label col-xs-12">
+                <?= AmosDiscussioni::t('amosdiscussioni', '#discussion_closed') ?>
+        </div>
+        <?php endif; ?>
+        
     </div>
-    <div class="col-md-4 col-xs-12">
+    <div class="col-md-4 col-xs-12 nop">
         <div class="col-xs-12 attachment-section-sidebar nop" id="section-attachments">
             <?= Html::tag('h2', AmosIcons::show('paperclip', [], 'dash') . AmosDiscussioni::t('amosdiscussioni', '#attachments_title')) ?>
             <div class="col-xs-12">
@@ -123,7 +137,7 @@ if($model->status != DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA) {
         <div class="tags-section-sidebar col-xs-12 nop" id="section-tags">
             <?= Html::tag('h2', AmosIcons::show('tag', [], 'dash') . AmosDiscussioni::t('amosdiscussioni', '#tags_title')) ?>
             <div class="col-xs-12">
-                <?= \lispa\amos\core\forms\ListTagsWidget::widget([
+                <?= \open20\amos\core\forms\ListTagsWidget::widget([
                     'userProfile' => $model->id,
                     'className' => $model->className(),
                     'viewFilesCounter' => true,

@@ -1,26 +1,26 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\components
+ * @package    open20\amos\discussioni\components
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\components;
+namespace open20\amos\discussioni\components;
 
-use lispa\amos\attachments\models\File;
-use lispa\amos\core\components\PartQuestionarioAbstract;
-use lispa\amos\discussioni\AmosDiscussioni;
-use lispa\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\attachments\models\File;
+use open20\amos\core\components\PartQuestionarioAbstract;
+use open20\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\models\DiscussioniTopic;
 use Yii;
 use yii\web\UploadedFile;
 
 /**
  * Class PartsWizardDiscussioniTopicCreation
- * @package lispa\amos\discussioni\components
+ * @package open20\amos\discussioni\components
  */
 class PartsWizardDiscussioniTopicCreation extends PartQuestionarioAbstract
 {

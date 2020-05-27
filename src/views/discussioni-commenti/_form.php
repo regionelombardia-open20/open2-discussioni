@@ -1,23 +1,23 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-use lispa\amos\core\forms\CloseSaveButtonWidget;
-use lispa\amos\core\forms\CreatedUpdatedWidget;
-use lispa\amos\discussioni\AmosDiscussioni;
+use open20\amos\core\forms\CloseSaveButtonWidget;
+use open20\amos\core\forms\CreatedUpdatedWidget;
+use open20\amos\discussioni\AmosDiscussioni;
 use kartik\widgets\ActiveForm;
 use yii\bootstrap\Tabs;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\discussioni\models\DiscussioniCommenti $model
+ * @var open20\amos\discussioni\models\DiscussioniCommenti $model
  * @var yii\widgets\ActiveForm $form
  */
 
@@ -61,7 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
             echo $form->field($model, 'discussioni_risposte_id')->hiddenInput();
         } else {
             echo $form->field($model, 'discussioni_risposte_id')->dropDownList(
-                \yii\helpers\ArrayHelper::map(lispa\amos\discussioni\models\DiscussioniRisposte::find()->all(), 'id', 'testo'),
+                \yii\helpers\ArrayHelper::map(open20\amos\discussioni\models\DiscussioniRisposte::find()->all(), 'id', 'testo'),
                 ['prompt' => AmosDiscussioni::t('amosdiscussioni', 'Seleziona')]
             );
         }

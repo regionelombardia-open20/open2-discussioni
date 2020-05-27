@@ -1,8 +1,17 @@
 <?php
 
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
 
-use lispa\amos\core\migration\AmosMigrationPermissions;
-use lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard;
+
+use open20\amos\core\migration\AmosMigrationPermissions;
+use open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard;
 use yii\helpers\ArrayHelper;
 use yii\rbac\Permission;
 

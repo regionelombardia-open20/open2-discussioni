@@ -1,22 +1,22 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\models\search;
+namespace open20\amos\discussioni\models\search;
 
-use lispa\amos\discussioni\models\DiscussioniRisposte;
+use open20\amos\discussioni\models\DiscussioniRisposte;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 
 /**
- * DiscussioniRisposteSearch represents the model behind the search form about `lispa\amos\discussioni\models\DiscussioniRisposte`.
+ * DiscussioniRisposteSearch represents the model behind the search form about `open20\amos\discussioni\models\DiscussioniRisposte`.
  */
 class DiscussioniRisposteSearch extends DiscussioniRisposte
 {

@@ -1,8 +1,17 @@
 <?php
 
-use lispa\amos\dashboard\models\AmosWidgets;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
 
-class m170601_081636_add_discussion_community_dashboard_widget extends \lispa\amos\core\migration\AmosMigrationWidgets
+use open20\amos\dashboard\models\AmosWidgets;
+
+class m170601_081636_add_discussion_community_dashboard_widget extends \open20\amos\core\migration\AmosMigrationWidgets
 {
     const MODULE_NAME = 'discussioni';
 
@@ -10,13 +19,13 @@ class m170601_081636_add_discussion_community_dashboard_widget extends \lispa\am
     {
         $this->widgets = [
             [
-                'classname' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
+                'classname' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className(),
                 'type' => AmosWidgets::TYPE_ICON,
                 'module' => self::MODULE_NAME,
                 'status' => AmosWidgets::STATUS_ENABLED
             ],
             [
-                'classname' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
+                'classname' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
                 'type' => AmosWidgets::TYPE_ICON,
                 'module' => self::MODULE_NAME,
                 'update' => true,

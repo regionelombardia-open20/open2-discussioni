@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\community\migrations
+ * @package    open20\amos\community\migrations
  * @category   CategoryName
  */
 
-use lispa\amos\core\migration\AmosMigrationPermissions;
+use open20\amos\core\migration\AmosMigrationPermissions;
 use yii\rbac\Permission;
 
 /**
@@ -24,10 +24,10 @@ class m180605_163422_permissions_workflow_disc_rules extends AmosMigrationPermis
     {
         return [
             [
-                'name' => \lispa\amos\discussioni\rules\workflow\DiscussioniToValidateWorkflowRule::className(),
+                'name' => \open20\amos\discussioni\rules\workflow\DiscussioniToValidateWorkflowRule::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Check permissio to validate',
-                'ruleName' => \lispa\amos\discussioni\rules\workflow\DiscussioniToValidateWorkflowRule::className(),
+                'ruleName' => \open20\amos\discussioni\rules\workflow\DiscussioniToValidateWorkflowRule::className(),
                 'parent' => ['CREATORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI', 'DiscussionValidate', 'VALIDATORE_DISCUSSIONI']
             ],
             [
@@ -35,7 +35,7 @@ class m180605_163422_permissions_workflow_disc_rules extends AmosMigrationPermis
                 'update' => true,
                 'newValues' => [
                     'addParents' => [
-                        \lispa\amos\discussioni\rules\workflow\DiscussioniToValidateWorkflowRule::className()
+                        \open20\amos\discussioni\rules\workflow\DiscussioniToValidateWorkflowRule::className()
                     ],
                     'removeParents' => [
                         'CREATORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI', 'DiscussionValidate', 'VALIDATORE_DISCUSSIONI'

@@ -1,17 +1,17 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\rules;
+namespace open20\amos\discussioni\rules;
 
-use lispa\amos\admin\rules\DefaultFacilitatorOwnContentRule;
+use open20\amos\admin\rules\DefaultFacilitatorOwnContentRule;
 
 class UpdateFacilitatorOwnDiscussioniRule extends DefaultFacilitatorOwnContentRule
 {

@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\migrations
+ * @package    open20\amos\discussioni\migrations
  * @category   CategoryName
  */
 
@@ -21,14 +21,14 @@ class m171221_081234_set_dashboard_visible_widget extends Migration
     public function safeUp()
     {
         $this->update(self::TABLE, ['dashboard_visible' => 1],
-            ['classname' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className()]);
+            ['classname' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className()]);
         return true;
     }
 
     public function safeDown()
     {
         $this->update(self::TABLE, ['dashboard_visible' => 0],
-            ['classname' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className()]);
+            ['classname' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard::className()]);
         return true;
     }
 }

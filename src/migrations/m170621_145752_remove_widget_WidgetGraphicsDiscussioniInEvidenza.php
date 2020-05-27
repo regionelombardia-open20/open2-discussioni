@@ -1,7 +1,16 @@
 <?php
 
-use lispa\amos\core\migration\AmosMigrationWidgets;
-use lispa\amos\dashboard\models\AmosWidgets;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
+use open20\amos\core\migration\AmosMigrationWidgets;
+use open20\amos\dashboard\models\AmosWidgets;
 
 class m170621_145752_remove_widget_WidgetGraphicsDiscussioniInEvidenza extends AmosMigrationWidgets
 {
@@ -37,11 +46,11 @@ class m170621_145752_remove_widget_WidgetGraphicsDiscussioniInEvidenza extends A
     {
         return [
             [
-                'classname' => \lispa\amos\discussioni\widgets\graphics\WidgetGraphicsDiscussioniInEvidenza::className(),
+                'classname' => \open20\amos\discussioni\widgets\graphics\WidgetGraphicsDiscussioniInEvidenza::className(),
                 'type' => AmosWidgets::TYPE_GRAPHIC,
                 'module' => self::MODULE_NAME,
                 'status' => AmosWidgets::STATUS_DISABLED,
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
                 'default_order' => 1,
                 'update' => true
             ],

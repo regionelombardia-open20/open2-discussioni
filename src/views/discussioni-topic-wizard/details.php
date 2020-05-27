@@ -1,23 +1,23 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\views\discussioni-topic-wizard
+ * @package    open20\amos\discussioni\views\discussioni-topic-wizard
  * @category   CategoryName
  */
 
-use lispa\amos\attachments\components\AttachmentsInput;
-use lispa\amos\core\forms\ActiveForm;
-use lispa\amos\core\forms\WizardPrevAndContinueButtonWidget;
-use lispa\amos\discussioni\AmosDiscussioni;
+use open20\amos\attachments\components\AttachmentsInput;
+use open20\amos\core\forms\ActiveForm;
+use open20\amos\core\forms\WizardPrevAndContinueButtonWidget;
+use open20\amos\discussioni\AmosDiscussioni;
 use yii\redactor\widgets\Redactor;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\discussioni\models\DiscussioniTopic $model
+ * @var open20\amos\discussioni\models\DiscussioniTopic $model
  * @var yii\widgets\ActiveForm $form
  */
 

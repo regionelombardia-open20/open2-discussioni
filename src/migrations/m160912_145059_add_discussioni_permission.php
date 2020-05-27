@@ -1,24 +1,24 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-use lispa\amos\core\migration\AmosMigration;
-use lispa\amos\discussioni\models\DiscussioniTopic;
-use lispa\amos\discussioni\rules\DeleteFacilitatorOwnDiscussioniRule;
-use lispa\amos\discussioni\rules\DeleteOwnDiscussioniRule;
-use lispa\amos\discussioni\rules\UpdateFacilitatorOwnDiscussioniRule;
-use lispa\amos\discussioni\rules\UpdateOwnDiscussioniCommentiRule;
-use lispa\amos\discussioni\rules\UpdateOwnDiscussioniRule;
-use lispa\amos\discussioni\rules\UpdateOwnDiscussioniRisposteRule;
-use lispa\amos\discussioni\rules\DeleteOwnDiscussioniCommentiRule;
-use lispa\amos\discussioni\rules\DeleteOwnDiscussioniRisposteRule;
+use open20\amos\core\migration\AmosMigration;
+use open20\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\discussioni\rules\DeleteFacilitatorOwnDiscussioniRule;
+use open20\amos\discussioni\rules\DeleteOwnDiscussioniRule;
+use open20\amos\discussioni\rules\UpdateFacilitatorOwnDiscussioniRule;
+use open20\amos\discussioni\rules\UpdateOwnDiscussioniCommentiRule;
+use open20\amos\discussioni\rules\UpdateOwnDiscussioniRule;
+use open20\amos\discussioni\rules\UpdateOwnDiscussioniRisposteRule;
+use open20\amos\discussioni\rules\DeleteOwnDiscussioniCommentiRule;
+use open20\amos\discussioni\rules\DeleteOwnDiscussioniRisposteRule;
 use yii\rbac\Permission;
 
 class m160912_145059_add_discussioni_permission extends AmosMigration
@@ -26,6 +26,7 @@ class m160912_145059_add_discussioni_permission extends AmosMigration
 
     /**
      * Use this instead of function up().
+     * @see \Yii\db\Migration::safeUp() for more info.
      */
     public function safeUp()
     {        
@@ -34,6 +35,7 @@ class m160912_145059_add_discussioni_permission extends AmosMigration
 
     /**
      * Use this instead of function down().
+     * @see \Yii\db\Migration::safeDown() for more info.
      */
     public function safeDown()
     {
@@ -365,49 +367,49 @@ class m160912_145059_add_discussioni_permission extends AmosMigration
     {
         return [
             [
-                'name' => lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicCreatedBy::className(),
+                'name' => open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicCreatedBy::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso widget delle discussioni create da se stesso',
                 'ruleName' => null,
                 'parent' => ['CREATORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI']
             ],
             [
-                'name' => lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicDaValidare::className(),
+                'name' => open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicDaValidare::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso widget delle discussioni da validare',
                 'ruleName' => null,
                 'parent' => ['VALIDATORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI']
             ],
             [
-                'name' => lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopic::className(),
+                'name' => open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopic::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso widget delle discussioni validate',
                 'ruleName' => null,
                 'parent' => ['LETTORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI']
             ],
             [
-                'name' => lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
+                'name' => open20\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso widget della dashboard interna delle discussioni',
                 'ruleName' => null,
                 'parent' => ['AMMINISTRATORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI']
             ],
             [
-                'name' => lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAll::className(),
+                'name' => open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAll::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso widget della dashboard interna delle discussioni',
                 'ruleName' => null,
                 'parent' => ['AMMINISTRATORE_DISCUSSIONI']
             ],
             [
-                'name' => lispa\amos\discussioni\widgets\graphics\WidgetGraphicsUltimeDiscussioni::className(),
+                'name' => open20\amos\discussioni\widgets\graphics\WidgetGraphicsUltimeDiscussioni::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso widget grafico delle ultime discussioni',
                 'ruleName' => null,
                 'parent' => ['LETTORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI']
             ],
             [
-                'name' => lispa\amos\discussioni\widgets\graphics\WidgetGraphicsDiscussioniInEvidenza::className(),
+                'name' => open20\amos\discussioni\widgets\graphics\WidgetGraphicsDiscussioniInEvidenza::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso widget grafico delle discussioni in evidenza',
                 'ruleName' => null,

@@ -1,23 +1,24 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-use lispa\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\AmosDiscussioni;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /**
  * @var yii\web\View $this
- * @var \lispa\amos\discussioni\models\search\DiscussioniTopicSearch $model
+ * @var \open20\amos\discussioni\models\search\DiscussioniTopicSearch $model
  * @var yii\widgets\ActiveForm $form
  */
+$currentView = Yii::$app->request->getQueryParam('currentView');
 ?>
 
 <div class="discussioni-topic-order element-to-toggle" data-toggle-element="form-order">
@@ -32,26 +33,27 @@ use yii\widgets\ActiveForm;
             'class' => 'default-form'
         ]
     ]);
-    echo Html::hiddenInput("currentView", Yii::$app->request->getQueryParam('currentView')); ?>
+    echo Html::hiddenInput("currentView", $currentView); ?>
     
     <div class="col-sm-6 col-lg-4">
         <?= $form->field($model, 'orderAttribute')->dropDownList($model->getOrderAttributesLabels()) ?>
     </div>
+    
     <div class="col-sm-6 col-lg-4">
-        <?= $form->field($model, 'orderType')->dropDownList(
-            [
-                SORT_ASC => AmosDiscussioni::t('amosdiscussioni', 'Crescente'),
-                SORT_DESC => AmosDiscussioni::t('amosdiscussioni', 'Decrescente'),
-            ]
-        )
-        ?>
+    <?= $form->field($model, 'orderType')->dropDownList([
+        SORT_ASC => AmosDiscussioni::t('amosdiscussioni', 'Crescente'),
+        SORT_DESC => AmosDiscussioni::t('amosdiscussioni', 'Decrescente'),
+    ])
+    ?>
     </div>
 
     <div class="col-xs-12">
         <div class="pull-right">
-            <?= Html::a(AmosDiscussioni::t('amosdiscussioni', 'Annulla'), [Yii::$app->controller->action->id, 'currentView' => Yii::$app->request->getQueryParam('currentView')],
-                ['class'=>'btn btn-secondary']) ?>
-            <?= Html::submitButton(AmosDiscussioni::t('amosdiscussioni', 'Ordina'), ['class' => 'btn btn-navigation-primary']) ?>
+        <?= Html::a(
+            AmosDiscussioni::t('amosdiscussioni', 'Annulla'), 
+            [Yii::$app->controller->action->id, 'currentView' => $currentView],
+            ['class'=>'btn btn-secondary']) ?>
+        <?= Html::submitButton(AmosDiscussioni::t('amosdiscussioni', 'Ordina'), ['class' => 'btn btn-navigation-primary']) ?>
         </div>
     </div>
 

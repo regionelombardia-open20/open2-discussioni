@@ -1,14 +1,14 @@
 <?php
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-use lispa\amos\core\migration\AmosMigrationPermissions;
+use open20\amos\core\migration\AmosMigrationPermissions;
 use yii\rbac\Permission;
 
 /**
@@ -28,7 +28,7 @@ class m170330_100316_add_alldiscussions_permission_all_plugin_roles extends Amos
                 'dontRemove' => true
             ],
             [
-                'name' => lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAll::className(),
+                'name' => open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAll::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso widget della dashboard interna delle discussioni',
                 'ruleName' => null,
@@ -36,7 +36,7 @@ class m170330_100316_add_alldiscussions_permission_all_plugin_roles extends Amos
                 'dontRemove' => true
             ],
             [
-                'name' => lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopic::className(),
+                'name' => open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopic::className(),
                 'type' => Permission::TYPE_PERMISSION,
                 'description' => 'Permesso widget della dashboard interna delle discussioni',
                 'ruleName' => null,

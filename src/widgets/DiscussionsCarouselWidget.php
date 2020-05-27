@@ -1,31 +1,30 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\widgets
+ * @package    open20\amos\discussioni\widgets
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\widgets;
+namespace open20\amos\discussioni\widgets;
 
-use lispa\amos\core\forms\AmosCarouselWidget;
-use lispa\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\core\forms\AmosCarouselWidget;
+use open20\amos\discussioni\models\DiscussioniTopic;
 use yii\db\ActiveQuery;
 
 /**
  * Class DiscussionsCarouselWidget
- * @package lispa\amos\discussioni\widgets
+ * @package open20\amos\discussioni\widgets
  */
-class DiscussionsCarouselWidget extends AmosCarouselWidget
-{
+class DiscussionsCarouselWidget extends AmosCarouselWidget {
+
     /**
      * @inheritdoc
      */
-    public function init()
-    {
+    public function init() {
         $this->setItems($this->getDiscussionsItems());
 
         parent::init();
@@ -34,8 +33,7 @@ class DiscussionsCarouselWidget extends AmosCarouselWidget
     /**
      * @return array
      */
-    protected function getDiscussionsItems()
-    {
+    protected function getDiscussionsItems() {
         $discussionsHighlights = [];
         $highlightsModule = \Yii::$app->getModule('highlights');
 
@@ -43,13 +41,15 @@ class DiscussionsCarouselWidget extends AmosCarouselWidget
             /** @var \amos\highlights\Module $highlightsModule */
             $discussionsHighlightsIds = $highlightsModule->getHighlightedContents(DiscussioniTopic::className());
             /** @var ActiveQuery $query */
-            $query = DiscussioniTopic::find();
-            $query->distinct();
-            $query->andWhere(['id' => $discussionsHighlightsIds]);
-            $query->andWhere(['status' => DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA]);
+            $query = DiscussioniTopic::find()
+                ->distinct()
+                ->andWhere(['id' => $discussionsHighlightsIds])
+                ->andWhere(['status' => DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA]);
+
             $discussionsHighlights = $query->all();
         }
 
         return $discussionsHighlights;
     }
+
 }

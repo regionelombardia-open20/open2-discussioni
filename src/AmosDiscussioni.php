@@ -1,64 +1,99 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni;
+namespace open20\amos\discussioni;
 
-use lispa\amos\core\module\AmosModule;
-use lispa\amos\core\module\ModuleInterface;
-use lispa\amos\core\interfaces\SearchModuleInterface;
-use lispa\amos\core\interfaces\CmsModuleInterface;
-use lispa\amos\discussioni\widgets\graphics\WidgetGraphicsDiscussioniInEvidenza;
-use lispa\amos\discussioni\widgets\graphics\WidgetGraphicsUltimeDiscussioni;
-use lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopic;
-use lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicCreatedBy;
-use lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicDaValidare;
+use open20\amos\core\module\AmosModule;
+use open20\amos\core\module\ModuleInterface;
+use open20\amos\core\interfaces\SearchModuleInterface;
+use open20\amos\core\interfaces\CmsModuleInterface;
+use open20\amos\discussioni\widgets\graphics\WidgetGraphicsDiscussioniInEvidenza;
+use open20\amos\discussioni\widgets\graphics\WidgetGraphicsUltimeDiscussioni;
+use open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopic;
+use open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicCreatedBy;
+use open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicDaValidare;
 use Yii;
 use yii\console\Application;
 
 /**
  * Class AmosDiscussioni
- * @package lispa\amos\discussioni
+ * @package open20\amos\discussioni
  */
-class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModuleInterface , CmsModuleInterface
+class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModuleInterface, CmsModuleInterface
 {
+   
     /**
-     * @var string $controllerNamespace the controller namespace
+     * @var bool $disableComments disable comments
      */
-    public $controllerNamespace = 'lispa\amos\discussioni\controllers';
-    public $geolocalEnabled = false;
-    public $geolocalLatColumn = 'lat';
-    public $geolocalLngColumn = 'lng';
-    public $geolocalRadius = '5000';
-    public $name = 'Discussioni';
-
-    /**
-     * @var bool $hideWidgetGraphicsActions
-     */
-    public $hideWidgetGraphicsActions = false;
-
-    /**
-     * @var bool $notifyOnlyContributors
-     */
-    public $notifyOnlyContributors = true;
-
-    /**
-     * @var array $defaultListViews This set the default order for the views in lists
-     */
-    public $defaultListViews = ['list'/*, 'icon'*/, 'grid'];
-
+    public $disableComments = false;
     
-    public $enable_foreground = false;
-    public $foreground_permission = 'DISCUSSION_FOREGROUD_PERMISSION';
+    const
+        MAX_LAST_DISCUSSION_ON_DASHBOARD = 3;
 
-    
+    /**
+     * 
+     */
+    public
+    // @var string $controllerNamespace the controller namespace
+        $controllerNamespace = 'open20\amos\discussioni\controllers',
+        $geolocalEnabled = false,
+        $geolocalLatColumn = 'lat',
+        $geolocalLngColumn = 'lng',
+        $geolocalRadius = '5000',
+        $name = 'Discussioni',
+        // @var bool $notifyOnlyContributors
+        $notifyOnlyContributors = true,
+        // @var array $defaultListViews This set the default order for the views in lists
+        $defaultListViews = ['list'/* , 'icon' */, 'grid'],
+        $enable_foreground = false,
+        $foreground_permission = 'DISCUSSION_FOREGROUD_PERMISSION',
+        // @var string
+        $defaultWidgetIndexUrl = '/discussioni/discussioni-topic/own-interest-discussions';
+
+    /*
+     * @var bool disableStandardWorkflow Disable standard worflow, direct publish
+     */
+    public $disableStandardWorkflow = false;
+
+    /**
+     * @param \yii\base\Application $app
+     */
+    public function bootstrap($app)
+    {
+        if ($app instanceof Application) {
+            $this->controllerNamespace = 'open20\amos\discussioni\commands\controllers';
+            \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/commands/controllers', __DIR__ . '/commands/controllers');
+            \Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'commands' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
+        }
+    }
+
+    /**
+     *
+     */
+    public function init()
+    {
+        parent::init();
+
+        if (\Yii::$app instanceof Application) {
+            \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/commands', __DIR__ . '/commands/');
+            \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
+            //aggiunge le configurazioni trovate nel file config/config.php
+            Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
+        } else {
+            \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
+            //aggiunge le configurazioni trovate nel file config/config.php
+            Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
+        }
+    }
+
     /**
      * @return string - The name of the module
      */
@@ -66,49 +101,34 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     {
         return "discussioni";
     }
-    
-    public static function getModelSearchClassName() {
-        return __NAMESPACE__.'\models\search\DiscussioniTopicSearch';
+
+    /**
+     * 
+     * @return type
+     */
+    public static function getModelSearchClassName()
+    {
+        return __NAMESPACE__ . '\models\search\DiscussioniTopicSearch';
     }
-    
-    public static function getModelClassName() {
-        return __NAMESPACE__.'\models\DiscussioniTopic';
+
+    /**
+     * 
+     * @return type
+     */
+    public static function getModelClassName()
+    {
+        return __NAMESPACE__ . '\models\DiscussioniTopic';
     }
-    
-    public static function getModuleIconName() {
+
+    /**
+     * 
+     * @return string
+     */
+    public static function getModuleIconName()
+    {
         return 'comment';
     }
-    
-    /**
-     * @param \yii\base\Application $app
-     */
-    public function bootstrap($app)
-    {
-        if ($app instanceof Application) {
-            $this->controllerNamespace = 'lispa\amos\discussioni\console\controllers';
-            \Yii::setAlias('@lispa/amos/' . static::getModuleName() . '/console/controllers', __DIR__ . '/console/controllers');
-            \Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'console' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
-        }
-    }
-    
-    /**
-     *
-     */
-    public function init()
-    {
-        parent::init();
-        
-        if (\Yii::$app instanceof Application) {
-            \Yii::setAlias('@lispa/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
-            //aggiunge le configurazioni trovate nel file config/config.php
-            Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
-        } else {
-            \Yii::setAlias('@lispa/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
-            //aggiunge le configurazioni trovate nel file config/config.php
-            Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
-        }
-    }
-    
+
     /**
      * @return boolean
      */
@@ -116,7 +136,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     {
         return $this->geolocalEnabled;
     }
-    
+
     /**
      * @param boolean $geolocalEnabled
      */
@@ -124,7 +144,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     {
         $this->geolocalEnabled = $geolocalEnabled;
     }
-    
+
     /**
      * @return string
      */
@@ -132,7 +152,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     {
         return $this->geolocalLatColumn;
     }
-    
+
     /**
      * @param string $geolocalLatColumn
      */
@@ -140,7 +160,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     {
         $this->geolocalLatColumn = $geolocalLatColumn;
     }
-    
+
     /**
      * @return string
      */
@@ -148,7 +168,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     {
         return $this->geolocalLngColumn;
     }
-    
+
     /**
      * @param string $geolocalLngColumn
      */
@@ -156,7 +176,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     {
         $this->geolocalLngColumn = $geolocalLngColumn;
     }
-    
+
     /**
      * @return string
      */
@@ -164,7 +184,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     {
         return $this->geolocalRadius;
     }
-    
+
     /**
      * @param string $geolocalRadius
      */
@@ -172,7 +192,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     {
         $this->geolocalRadius = $geolocalRadius;
     }
-    
+
     /**
      * @return array: classname of the graphic widgets
      */
@@ -183,7 +203,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
             WidgetGraphicsDiscussioniInEvidenza::className(),
         ];
     }
-    
+
     /**
      * @return array: classname of the icon widgets
      */
@@ -195,7 +215,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
             WidgetIconDiscussioniTopicDaValidare::className(),
         ];
     }
-    
+
     /**
      * @return array
      */
@@ -207,7 +227,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
             'DiscussioniRisposte' => __NAMESPACE__ . '\\' . 'models\DiscussioniRisposte',
         ];
     }
-    
+
     /**
      * This method return the session key that must be used to add in session
      * the url from the user have started the content creation.
@@ -217,4 +237,5 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     {
         return 'beginCreateNewUrl_' . self::getModuleName();
     }
+
 }

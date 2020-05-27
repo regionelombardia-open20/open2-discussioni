@@ -1,22 +1,22 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-use lispa\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\AmosDiscussioni;
 
 /**
  * @var yii\web\View $this
- * @var lispa\amos\discussioni\models\DiscussioniTopic $model
+ * @var open20\amos\discussioni\models\DiscussioniTopic $model
  */
 
-/** @var \lispa\amos\discussioni\controllers\DiscussioniTopicController $controller */
+/** @var \open20\amos\discussioni\controllers\DiscussioniTopicController $controller */
 $controller = Yii::$app->controller;
 $controller->setNetworkDashboardBreadcrumb();
 $this->title = $model->titolo;

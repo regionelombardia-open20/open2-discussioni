@@ -1,34 +1,34 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\models
+ * @package    open20\amos\discussioni\models
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\models;
+namespace open20\amos\discussioni\models;
 
-use lispa\amos\admin\models\UserProfile;
-use lispa\amos\attachments\behaviors\FileBehavior;
-use lispa\amos\comments\models\Comment;
-use lispa\amos\comments\models\CommentInterface;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\core\interfaces\ContentModelInterface;
-use lispa\amos\core\interfaces\ModelImageInterface;
-use lispa\amos\core\interfaces\ViewModelInterface;
-use lispa\amos\core\user\User;
-use lispa\amos\core\views\toolbars\StatsToolbarPanels;
-use lispa\amos\discussioni\AmosDiscussioni;
-use lispa\amos\discussioni\i18n\grammar\DiscussionTopicGrammar;
-use lispa\amos\discussioni\models\base\DiscussioniTopic as DiscussioniTopicBase;
-use lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard;
-use lispa\amos\notificationmanager\behaviors\NotifyBehavior;
-use lispa\amos\workflow\behaviors\WorkflowLogFunctionsBehavior;
-use lispa\amos\report\utilities\ReportUtil;
-use lispa\amos\seo\behaviors\SeoContentBehavior;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\attachments\behaviors\FileBehavior;
+use open20\amos\comments\models\Comment;
+use open20\amos\comments\models\CommentInterface;
+use open20\amos\core\helpers\Html;
+use open20\amos\core\interfaces\ContentModelInterface;
+use open20\amos\core\interfaces\ModelImageInterface;
+use open20\amos\core\interfaces\ViewModelInterface;
+use open20\amos\core\user\User;
+use open20\amos\core\views\toolbars\StatsToolbarPanels;
+use open20\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\i18n\grammar\DiscussionTopicGrammar;
+use open20\amos\discussioni\models\base\DiscussioniTopic as DiscussioniTopicBase;
+use open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniDashboard;
+use open20\amos\notificationmanager\behaviors\NotifyBehavior;
+use open20\amos\workflow\behaviors\WorkflowLogFunctionsBehavior;
+use open20\amos\report\utilities\ReportUtil;
+use open20\amos\seo\behaviors\SeoContentBehavior;
 use raoul2000\workflow\base\SimpleWorkflowBehavior;
 use Yii;
 use yii\behaviors\SluggableBehavior;
@@ -46,10 +46,10 @@ use yii\log\Logger;
  * @method string|null getRegolaPubblicazione()
  * @method array getTargets()
  *
- * @property \lispa\amos\admin\models\UserProfile $lastCommentUser
- * @property \lispa\amos\comments\models\Comment $lastComment
+ * @property \open20\amos\admin\models\UserProfile $lastCommentUser
+ * @property \open20\amos\comments\models\Comment $lastComment
  * @property string $lastCommentDate
- * @property \lispa\amos\comments\models\Comment[] $lastComments
+ * @property \open20\amos\comments\models\Comment[] $lastComments
  */
 class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInterface, CommentInterface, ViewModelInterface, ModelImageInterface
 {
@@ -120,6 +120,8 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
         parent::init();
         if ($this->isNewRecord) {
             $this->status = $this->getWorkflowSource()->getWorkflow(self::DISCUSSIONI_WORKFLOW)->getInitialStatusId();
+
+            $this->setCloseCommentThread(0);
         }
     }
 
@@ -134,6 +136,7 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     }
 
     /**
+     * @see \yii\base\Model::rules() for more info.
      */
     public function rules()
     {
@@ -359,7 +362,7 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function getCreatoreDiscussione()
     {
-        $modelClass = \lispa\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
+        $modelClass = \open20\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
         return $this->hasOne($modelClass::className(), ['user_id' => 'created_by']);
     }
 
@@ -369,7 +372,7 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function getUtenteUltimaRisposta()
     {
-        $modelClass = \lispa\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
+        $modelClass = \open20\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
         return $this->hasOne($modelClass::className(), ['user_id' => 'created_by'])->viaTable($this->getUltimaRisposta(), ['discussioni_topic_id' => 'id']);
     }
 
@@ -401,13 +404,13 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     }
 
     /**
-     * @param \lispa\amos\discussioni\models\DiscussioniRisposte $risposta
+     * @param \open20\amos\discussioni\models\DiscussioniRisposte $risposta
      * @return ActiveQuery
      * @deprecated from version 1.5. Use [[DiscussioniTopic::getCommentCreatorUser()]] instead of this.
      */
     public function getUtenteRisposta(DiscussioniRisposte $risposta)
     {
-        $modelClass = \lispa\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
+        $modelClass = \open20\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
         return $modelClass::find()->where(['user_id' => $risposta->created_by]);
     }
 
@@ -564,9 +567,9 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function getLastComment()
     {
-        return $this->hasOne(\lispa\amos\comments\models\Comment::className(), ['context_id' => 'id'])
+        return $this->hasOne(\open20\amos\comments\models\Comment::className(), ['context_id' => 'id'])
             ->where(['created_at' => $this->getLastCommentDate()])
-            ->andWhere(['context' => \lispa\amos\discussioni\models\DiscussioniTopic::className()]);
+            ->andWhere(['context' => \open20\amos\discussioni\models\DiscussioniTopic::className()]);
     }
 
     /**
@@ -575,8 +578,8 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function getLastCommentDate()
     {
-        return $this->hasOne(\lispa\amos\comments\models\Comment::className(), ['context_id' => 'id'])
-            ->andWhere(['context' => \lispa\amos\discussioni\models\DiscussioniTopic::className()])
+        return $this->hasOne(\open20\amos\comments\models\Comment::className(), ['context_id' => 'id'])
+            ->andWhere(['context' => \open20\amos\discussioni\models\DiscussioniTopic::className()])
             ->max('created_at');
     }
 
@@ -586,14 +589,14 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function getLastComments()
     {
-        return $this->hasOne(\lispa\amos\comments\models\Comment::className(), ['context_id' => 'id'])
-            ->andWhere(['context' => \lispa\amos\discussioni\models\DiscussioniTopic::className()])
+        return $this->hasOne(\open20\amos\comments\models\Comment::className(), ['context_id' => 'id'])
+            ->andWhere(['context' => \open20\amos\discussioni\models\DiscussioniTopic::className()])
             ->orderBy(['created_at' => SORT_DESC])->limit(3);
     }
 
     /**
      * @since 1.5 First time this was introduced.
-     * @param \lispa\amos\comments\models\Comment $comment
+     * @param \open20\amos\comments\models\Comment $comment
      * @return ActiveQuery
      */
     public function getCommentCreatorUser(Comment $comment)
@@ -610,12 +613,12 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
         $avatars = [];
         /** @var \yii\db\ActiveQuery $query */
         $query = Comment::find()
-            ->andWhere(['context_id' => $this->id, 'context' => \lispa\amos\discussioni\models\DiscussioniTopic::className()])
+            ->andWhere(['context_id' => $this->id, 'context' => \open20\amos\discussioni\models\DiscussioniTopic::className()])
             ->groupBy(['created_by'])
             ->limit(4);
         $listRecord = $query->all();
         foreach ($listRecord as $record) {
-            $modelClass = \lispa\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
+            $modelClass = \open20\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
             $usr = $modelClass::find()->where(['user_id' => $record->created_by])->one();
             if ($usr) {
                 $avatars[] = $usr;
@@ -661,7 +664,7 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     {
         $panels = [];
         $count_comments = 0;
-
+        return $panels;
         try {
             $panels = parent::getStatsToolbar($disableLink);
             $filescount = !is_null($this->discussionsTopicImage) ? $this->getFileCount() - 1 : $this->getFileCount();
@@ -669,12 +672,12 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
             if ($this->isCommentable()) {
                 $commentModule = \Yii::$app->getModule('comments');
                 if ($commentModule) {
-                    /** @var \lispa\amos\comments\AmosComments $commentModule */
+                    /** @var \open20\amos\comments\AmosComments $commentModule */
                     $count_comments = $commentModule->countComments($this);
                 }
                 $panels = ArrayHelper::merge($panels, StatsToolbarPanels::getCommentsPanel($this, $count_comments, $disableLink));
             }
-            $reportCount = count(ReportUtil::retrieveReports($this, $this->id));
+            $reportCount = count(ReportUtil::retrieveReports(get_class($this), $this->id));
             $panels = ArrayHelper::merge($panels, StatsToolbarPanels::getReportsPanel($this, $reportCount, $disableLink));
         } catch (\Exception $ex) {
             Yii::getLogger()->log($ex->getMessage(), Logger::LEVEL_ERROR);
@@ -742,7 +745,7 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
         ];
         $isCommunityManager = false;
         if (\Yii::$app->getModule('community')) {
-            $isCommunityManager = \lispa\amos\community\utilities\CommunityUtil::isLoggedCommunityManager();
+            $isCommunityManager = \open20\amos\community\utilities\CommunityUtil::isLoggedCommunityManager();
             if ($isCommunityManager) {
                 $isCommunityManager = true;
             }
@@ -767,6 +770,23 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     public function getSchema()
     {
         return '';
+    }
+    
+        
+    /**
+     * @inheritdoc
+     * @return type
+     */
+    public function getCloseCommentThread() {
+        return $this->close_comment_thread;
+    }
+
+    /**
+     * @inheritdoc
+     * @param type $closeCommentThread
+     */
+    public function setCloseCommentThread($closeCommentThread) {
+        $this->close_comment_thread = $closeCommentThread;
     }
 
 }

@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\migrations
+ * @package    open20\amos\discussioni\migrations
  * @category   CategoryName
  */
 
 use yii\db\Migration;
-use lispa\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\discussioni\models\DiscussioniTopic;
 
 /**
  * Class m170502_082746_change_discussions_workflow

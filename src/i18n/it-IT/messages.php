@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\i18n\it-IT
+ * @package    open20\amos\discussioni\i18n\it-IT
  * @category   CategoryName
  */
 
@@ -254,4 +254,14 @@ return [
     'Visualizzazioni' => 'Visualizzazioni',
     "#pubblication_on_portal" => "Modalità di pubblicazione sul portale",
     "#choose_publish_on_portal" => "Scegli se pubblicare la Notizia anche sul portale pubblico",
+    'LEGGI' => 'LEGGI',
+    '#by' => 'di',
+    '#showAll' => 'Visualizza tutto',
+    '#settings_advance' => 'Avanzate',
+    '#force_ok' => 'Si',
+    '#force_ko' => 'No',
+    '#close_comment_thread' => 'La discussione è conclusa?',
+    '#discussion_closed' => 'DISCUSSIONE CONCLUSA',
+    'dettaglio' => 'Dettaglio',
+    '#discussion_closed_list' => 'Discussione conclusa',
 ];

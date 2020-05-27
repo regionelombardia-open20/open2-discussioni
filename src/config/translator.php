@@ -1,4 +1,13 @@
 <?php
+
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
 /**
  * This is the configuration for generating message translations
  * for the Yii framework. It is used by the 'yiic message' command.

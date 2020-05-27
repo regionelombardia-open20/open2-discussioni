@@ -1,11 +1,11 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\i18n\en-US
+ * @package    open20\amos\discussioni\i18n\en-US
  * @category   CategoryName
  */
 
@@ -253,4 +253,13 @@ return [
     'Visualizzazioni' => 'Views',
     "#pubblication_on_portal" => "How to publish on the portal",
     "#choose_publish_on_portal" => "Choose whether to publish the Discussion also on the public portal",
+    'LEGGI' => 'READ',
+    '#by' => 'by',
+    '#showAll' => 'Show all',
+    '#settings_advance' => 'Advanced',
+    '#force_ok' => 'Yes',
+    '#force_ko' => 'No',
+    '#close_comment_thread' => 'The discussion is closed?',
+    '#discussion_closed' => 'DISCUSSION CLOSED',
+    '#discussion_closed_list' => 'Discussion closed',
 ];

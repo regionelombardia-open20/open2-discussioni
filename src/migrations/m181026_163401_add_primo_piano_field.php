@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
 use yii\db\Migration;
 
 /**
@@ -10,7 +19,7 @@ class m181026_163401_add_primo_piano_field extends Migration
      public function safeUp()
     {
 
-        $this->addColumn(\lispa\amos\discussioni\models\DiscussioniTopic::tableName(), 'primo_piano',
+        $this->addColumn(\open20\amos\discussioni\models\DiscussioniTopic::tableName(), 'primo_piano',
             $this->text()
                 ->null()
                 ->after('in_evidenza')
@@ -21,7 +30,7 @@ class m181026_163401_add_primo_piano_field extends Migration
 
     public function safeDown()
     {
-        $this->dropColumn(\lispa\amos\discussioni\models\DiscussioniTopic::tableName(), 'primo_piano');
+        $this->dropColumn(\open20\amos\discussioni\models\DiscussioniTopic::tableName(), 'primo_piano');
 
         return true;
     }

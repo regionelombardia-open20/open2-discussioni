@@ -1,7 +1,16 @@
 <?php
 
-use lispa\amos\core\migration\AmosMigrationWidgets;
-use lispa\amos\dashboard\models\AmosWidgets;
+/**
+ * Aria S.p.A.
+ * OPEN 2.0
+ *
+ *
+ * @package    Open20Package
+ * @category   CategoryName
+ */
+
+use open20\amos\core\migration\AmosMigrationWidgets;
+use open20\amos\dashboard\models\AmosWidgets;
 
 /**
  * Class m170221_165937_update_widgets_discussioni
@@ -29,7 +38,7 @@ class m170221_165937_update_widgets_discussioni extends AmosMigrationWidgets
     {
         return [
             [
-                'classname' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
+                'classname' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
                 'type' => AmosWidgets::TYPE_ICON,
                 'module' => self::MODULE_NAME,
                 'status' => AmosWidgets::STATUS_ENABLED,
@@ -37,38 +46,38 @@ class m170221_165937_update_widgets_discussioni extends AmosMigrationWidgets
                 'update' => true
             ],
             [
-                'classname' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopic::className(),
+                'classname' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopic::className(),
                 'type' => AmosWidgets::TYPE_ICON,
                 'module' => self::MODULE_NAME,
                 'status' => AmosWidgets::STATUS_ENABLED,
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
                 'default_order' => 10,
                 'update' => true
             ],
             [
-                'classname' => lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicCreatedBy::className(),
+                'classname' => open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicCreatedBy::className(),
                 'type' => AmosWidgets::TYPE_ICON,
                 'module' => self::MODULE_NAME,
                 'status' => AmosWidgets::STATUS_ENABLED,
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
                 'default_order' => 30,
                 'update' => true
             ],
             [
-                'classname' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAll::className(),
+                'classname' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAll::className(),
                 'type' => AmosWidgets::TYPE_ICON,
                 'module' => self::MODULE_NAME,
                 'status' => AmosWidgets::STATUS_ENABLED,
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
                 'default_order' => 40,
                 'update' => true
             ],
             [
-                'classname' => lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicDaValidare::className(),
+                'classname' => open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicDaValidare::className(),
                 'type' => AmosWidgets::TYPE_ICON,
                 'module' => self::MODULE_NAME,
                 'status' => AmosWidgets::STATUS_ENABLED,
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
                 'default_order' => 50,
                 'update' => true
             ]
@@ -83,20 +92,20 @@ class m170221_165937_update_widgets_discussioni extends AmosMigrationWidgets
     {
         return [
             [
-                'classname' => \lispa\amos\discussioni\widgets\graphics\WidgetGraphicsDiscussioniInEvidenza::className(),
+                'classname' => \open20\amos\discussioni\widgets\graphics\WidgetGraphicsDiscussioniInEvidenza::className(),
                 'type' => AmosWidgets::TYPE_GRAPHIC,
                 'module' => self::MODULE_NAME,
                 'status' => AmosWidgets::STATUS_ENABLED,
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
                 'default_order' => 1,
                 'update' => true
             ],
             [
-                'classname' => \lispa\amos\discussioni\widgets\graphics\WidgetGraphicsUltimeDiscussioni::className(),
+                'classname' => \open20\amos\discussioni\widgets\graphics\WidgetGraphicsUltimeDiscussioni::className(),
                 'type' => AmosWidgets::TYPE_GRAPHIC,
                 'module' => self::MODULE_NAME,
                 'status' => AmosWidgets::STATUS_ENABLED,
-                'child_of' => \lispa\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
+                'child_of' => \open20\amos\discussioni\widgets\icons\WidgetIconDiscussioni::className(),
                 'default_order' => 1,
                 'update' => true
             ]

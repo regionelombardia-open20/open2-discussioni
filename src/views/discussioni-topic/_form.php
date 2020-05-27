@@ -1,31 +1,32 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni
+ * @package    open20\amos\discussioni
  * @category   CategoryName
  */
 
-use lispa\amos\attachments\components\AttachmentsInput;
-use lispa\amos\attachments\components\AttachmentsList;
-use lispa\amos\attachments\components\CropInput;
-use lispa\amos\core\forms\AccordionWidget;
-use lispa\amos\core\forms\ActiveForm;
-use lispa\amos\core\forms\CreatedUpdatedWidget;
-use lispa\amos\core\forms\editors\Select;
-use lispa\amos\core\forms\TextEditorWidget;
-use lispa\amos\core\helpers\Html;
-use lispa\amos\cwh\widgets\DestinatariPlusTagWidget;
-use lispa\amos\discussioni\AmosDiscussioni;
-use lispa\amos\discussioni\models\DiscussioniTopic;
-use lispa\amos\news\AmosNews;
-use lispa\amos\report\widgets\ReportFlagWidget;
-use lispa\amos\seo\widgets\SeoWidget;
-use lispa\amos\workflow\widgets\WorkflowTransitionButtonsWidget;
-use lispa\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget;
+use open20\amos\attachments\components\AttachmentsInput;
+use open20\amos\attachments\components\AttachmentsList;
+use open20\amos\attachments\components\CropInput;
+use open20\amos\core\forms\AccordionWidget;
+use open20\amos\core\forms\ActiveForm;
+use open20\amos\core\forms\CreatedUpdatedWidget;
+use open20\amos\core\forms\editors\Select;
+use open20\amos\core\forms\TextEditorWidget;
+use open20\amos\core\helpers\Html;
+use open20\amos\cwh\widgets\DestinatariPlusTagWidget;
+use open20\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\news\AmosNews;
+use open20\amos\report\widgets\ReportFlagWidget;
+use open20\amos\seo\widgets\SeoWidget;
+use open20\amos\workflow\widgets\WorkflowTransitionButtonsWidget;
+use open20\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget;
+
 use yii\web\View;
 use yii\widgets\ActiveForm as ActiveForm2;
 
@@ -35,14 +36,18 @@ use yii\widgets\ActiveForm as ActiveForm2;
  * @var ActiveForm2 $form
  */
 
-?>
-
-<?php
 $form = ActiveForm::begin([
     'options' => ['enctype' => 'multipart/form-data'] // important
 ]);
 $customView = Yii::$app->getViewPath() . '/imageField.php';
 $utenteConnesso = Yii::$app->getUser();
+
+$appController = Yii::$app->controller;
+$disableStandardWorkflow = $appController->discussioniModule->disableStandardWorkflow;
+
+$module = \Yii::$app->getModule('discussioni');
+$moduleNotify = \Yii::$app->getModule('notify');
+
 ?>
 
 <?php if (!$model->isNewRecord) : ?>
@@ -57,25 +62,30 @@ $utenteConnesso = Yii::$app->getUser();
 <?php endif; ?>
 
 <div class="discussioni-form col-xs-12">
-
     <div class="row">
         <div class="col-xs-12">
-            <?= Html::tag('h2', AmosDiscussioni::t('amosdiscussioni', '#settings_general_title') .
-                CreatedUpdatedWidget::widget(['model' => $model, 'isTooltip' => true]) .
-                ReportFlagWidget::widget([
+            <?= Html::tag('h2', AmosDiscussioni::t('amosdiscussioni', '#settings_general_title')
+                . CreatedUpdatedWidget::widget(['model' => $model, 'isTooltip' => true])
+                . ReportFlagWidget::widget([
                     'model' => $model,
-                ]), ['class' => 'subtitle-form']) ?>
+                ]),
+                ['class' => 'subtitle-form'])
+            ?>
         </div>
 
         <div class="col-md-8 col-xs-12">
             <?= $form->field($model, 'titolo')->textInput(['maxlength' => true, 'placeholder' => AmosDiscussioni::t('amosdiscussioni', '#title_field_plceholder')])->hint(AmosDiscussioni::t('amosdiscussioni', '#title_field_hint')) ?>
-            <?= $form->field($model, 'testo')->widget(TextEditorWidget::className(), [
-                'clientOptions' => [
-                    'placeholder' => AmosDiscussioni::t('amosdiscussioni', '#description_field_placeholder'),
-                    'lang' => substr(Yii::$app->language, 0, 2)
+            <?= $form->field($model, 'testo')->widget(TextEditorWidget::className(),
+                [
+                    'clientOptions' => [
+                        'placeholder' => AmosDiscussioni::t('amosdiscussioni', '#description_field_placeholder'),
+                        'lang' => substr(Yii::$app->language, 0, 2)
+                    ]
                 ]
-            ]) ?>
+            ) ?>
+
         </div>
+
 
         <div class="col-md-4 col-xs-12">
             <div class="col-xs-12 nop">
@@ -114,61 +124,114 @@ $utenteConnesso = Yii::$app->getUser();
             $showReceiverSection = false;
 
             $moduleCwh = Yii::$app->getModule('cwh');
-            isset($moduleCwh) ? $showReceiverSection = true : null;
+            $showReceiverSection = isset($moduleCwh) ? true : null;
+            $scope = null;
+            if (!empty($moduleCwh)) {
+                $scope = $moduleCwh->getCwhScope();
+            }
 
             $moduleTag = Yii::$app->getModule('tag');
-            isset($moduleTag) ? $showReceiverSection = true : null;
+            $showReceiverSection = isset($moduleTag) ? true : null;
 
             if ($showReceiverSection) : ?>
                 <div class="col-xs-12 receiver-section">
-                    <?=
-                    DestinatariPlusTagWidget::widget([
+                    <?= DestinatariPlusTagWidget::widget([
                         'model' => $model,
+                        'moduleCwh' => $moduleCwh,
+                        'scope' => $scope
                     ]);
                     ?>
                 </div>
             <?php endif; ?>
 
             <?php
-            if (AmosDiscussioni::instance()->enable_foreground && Yii::$app->user->can(AmosDiscussioni::instance()->foreground_permission)) {
-                ?>
+            if (AmosDiscussioni::instance()->enable_foreground && Yii::$app->user->can(AmosDiscussioni::instance()->foreground_permission)) : ?>
                 <div class="col-xs-12 receiver-section">
                     <div class="row">
                         <h3 class="subtitle-section-form"><?= AmosNews::t('amosdiscussioni', "#pubblication_on_portal") ?>
                             <em>(<?= AmosNews::t('amosdiscussioni', "#choose_publish_on_portal") ?>)</em>
                         </h3>
-                        <?php
-                        $primoPiano = '<div class="col-md-4 col-xs-12">'
-                            . $form->field($model, 'primo_piano')->widget(Select::className(), [
-                                'auto_fill' => true,
-                                'data' => [
-                                    '0' => AmosNews::t('amosdiscussioni', 'No'),
-                                    '1' => AmosNews::t('amosdiscussioni', 'Si')
-                                ],
-                                'options' => [
-                                    'prompt' => AmosNews::t('amosdiscussioni', 'Seleziona'),
-                                    'disabled' => false,
-                                ],
-                            ]) .
-                            '</div>';
-                        echo $primoPiano;
 
-                        ?>
+                        <div class="col-md-4 col-xs-12">
+                            <?= $form->field($model, 'primo_piano')->widget(Select::className(),
+                                [
+                                    'auto_fill' => true,
+                                    'data' => Html::getBooleanFieldsValues(),
+                                    'options' => [
+                                        'prompt' => AmosNews::t('amosdiscussioni', 'Seleziona'),
+                                        'disabled' => false,
+                                    ],
+                                ]);
+                            ?>
+                        </div>
                     </div>
                 </div>
-                <?php
-            }
-            ?>
+            <?php endif; ?>
         </div>
+
         <div class="col-xs-12 note_asterisk">
             <span><?= AmosDiscussioni::t('amosdiscussioni', '#required_field') ?></span>
         </div>
+
         <div class="col-md-12 col-sm-12 hidden">
             <?= $form->field($model, 'in_evidenza')->checkbox() ?>
         </div>
+
+        <?php
+        $isCommunityManager = false;
+        if (\Yii::$app->getModule('community')) {
+            $isCommunityManager = \open20\amos\community\utilities\CommunityUtil::isLoggedCommunityManager();
+        }
+
+        if ((Yii::$app->user->can('ADMIN') || $isCommunityManager) && (isset($module->disableComments) && $module->disableComments)) : ?>
+            <div class="col-xs-12">
+                <?= Html::tag('h2', AmosDiscussioni::t('amosdiscussioni', '#settings_advance'), ['class' => 'subtitle-form']) ?>
+                <?php
+
+                echo Html::tag('div',
+                    $form->field($model, 'close_comment_thread')->inline()->radioList(
+                        [
+                            true => AmosDiscussioni::t('amosdiscussioni', '#force_ok'),
+                            false => AmosDiscussioni::t('amosdiscussioni', '#force_ko')
+                        ], ['class' => 'comment-choice'])->label(AmosDiscussioni::t('amosdiscussioni', '#close_comment_thread')
+                        , ['class' => 'col-md-8 col-xs-12']));
+                ?>
+
+            </div>
+            <div class="clearfix"></div>
+        <?php endif; ?>
     </div>
 
     <div class="row">
+        <?php if ($moduleNotify && !empty($moduleNotify->enableNotificationContentLanguage) && $moduleNotify->enableNotificationContentLanguage) { ?>
+            <?php
+            $contentLanguage = "<div class=\"col-xs-6 nop\">" . \open20\amos\notificationmanager\widgets\NotifyContentLanguageWidget::widget(['model' => $model]) . "</div>"
+            ?>
+            <div class="col-xs-12">
+                <?=
+                AccordionWidget::widget([
+                    'items' => [
+                        [
+                            'header' => AmosDiscussioni::t('amosdiscussioni', '#settings_optional'),
+                            'content' => $contentLanguage . '<div class="clearfix"></div>',
+                        ]
+                    ],
+                    'headerOptions' => ['tag' => 'h2'],
+                    'clientOptions' => [
+                        'collapsible' => true,
+                        'active' => 'false',
+                        'icons' => [
+                            'header' => 'ui-icon-amos am am-plus-square',
+                            'activeHeader' => 'ui-icon-amos am am-minus-square',
+                        ]
+                    ],
+                ]);
+                ?>
+            </div>
+        <?php } ?>
+
+
+
         <?php
         $moduleSeo = Yii::$app->getModule('seo');
         if (isset($moduleSeo)) : ?>
@@ -183,7 +246,7 @@ $utenteConnesso = Yii::$app->getUser();
                         ]
                     ],
                     'headerOptions' => ['tag' => 'h2'],
-                    'options' =>  Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
+                    'options' => Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
                     'clientOptions' => [
                         'collapsible' => true,
                         'active' => 'false',
@@ -197,67 +260,28 @@ $utenteConnesso = Yii::$app->getUser();
             </div>
         <?php endif; ?>
 
-
         <?php
         $config = [
             'model' => $model,
             'urlClose' => Yii::$app->session->get('previousUrl')
         ];
-        ?>
-
-        <?php
-
-        /*
-         *
-         * <?= \lispa\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget::widget([
-            'form' => $form,
-            'model' => $model,
-            'workflowId' => DiscussioniTopic::DISCUSSIONI_WORKFLOW,
-            'classDivIcon' => '',
-            'classDivMessage' => 'message',
-            'viewWidgetOnNewRecord' => true
-        ]); ?>
-         *
-         */
 
         $hideDraftStatuses = true;
-
-        if (Yii::$app->user->can('DiscussionValidate', ['model' => $model])) {
-            $hideDraftStatuses = false;
-        }
-
-        if (Yii::$app->user->can('ADMIN')) {
-            $hideDraftStatuses = false;
-        }
-
         $hideDraftStatus = [];
+
+        if ((Yii::$app->user->can('DiscussionValidate', ['model' => $model])) || (Yii::$app->user->can('ADMIN'))) {
+            $hideDraftStatuses = false;
+        }
+
         if ($hideDraftStatuses) {
             $hideDraftStatus[] = DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA;
         }
 
         $statusToRenderToHide = $model->getStatusToRenderToHide();
 
-        ?>
-
-        <?= WorkflowTransitionButtonsWidget::widget([
-
-            // parametri ereditati da verioni precedenti del widget WorkflowTransition
-            'form' => $form,
-            'model' => $model,
-            'workflowId' => DiscussioniTopic::DISCUSSIONI_WORKFLOW,
-            'viewWidgetOnNewRecord' => true,
-
-            'closeButton' => Html::a(AmosDiscussioni::t('amosdiscussioni', 'Annulla'), Yii::$app->session->get('previousUrl'), ['class' => 'btn btn-secondary']),
-
-            // fisso lo stato iniziale per generazione pulsanti e comportamenti
-            // "fake" in fase di creazione (il record non e' ancora inserito nel db)
-            'initialStatusName' => explode('/', $model->getWorkflowSource()->getWorkflow(DiscussioniTopic::DISCUSSIONI_WORKFLOW)->getInitialStatusId())[1],
-            'initialStatus' => $model->getWorkflowSource()->getWorkflow(DiscussioniTopic::DISCUSSIONI_WORKFLOW)->getInitialStatusId(),
-            // Stati da renderizzare obbligatoriamente in fase di creazione (quando il record non e' ancora inserito nel db)
-            'statusToRender' => $statusToRenderToHide['statusToRender'],
-            'hideSaveDraftStatus' => $statusToRenderToHide['hideDraftStatus'],
-
-            'draftButtons' => [
+        $draftButtons = [];
+        if ($disableStandardWorkflow == false) {
+            $draftButtons = [
                 DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_DAVALIDARE => [
                     'button' => Html::submitButton(Yii::t('amoscommunity', 'Salva'), ['class' => 'btn btn-workflow']),
                     'description' => AmosDiscussioni::t('amosdiscussioni', 'le modifiche e mantieni la discussione in "richiesta di pubblicazione"'),
@@ -270,7 +294,29 @@ $utenteConnesso = Yii::$app->getUser();
                     'button' => Html::submitButton(AmosDiscussioni::t('amosdiscussioni', 'Salva in bozza'), ['class' => 'btn btn-workflow']),
                     'description' => AmosDiscussioni::t('amosdiscussioni', 'potrai richiedere la pubblicazione in seguito'),
                 ]
-            ]
+            ];
+        }
+        $workflowInitialStatusId = $model->getWorkflowSource()->getWorkflow(DiscussioniTopic::DISCUSSIONI_WORKFLOW)->getInitialStatusId();
+        echo WorkflowTransitionButtonsWidget::widget([
+            // parametri ereditati da verioni precedenti del widget WorkflowTransition
+            'form' => $form,
+            'model' => $model,
+            'workflowId' => DiscussioniTopic::DISCUSSIONI_WORKFLOW,
+            'viewWidgetOnNewRecord' => true,
+            'closeButton' => Html::a(
+                AmosDiscussioni::t('amosdiscussioni', 'Annulla'),
+                Yii::$app->session->get('previousUrl'), ['class' => 'btn btn-secondary']
+            ),
+            // fisso lo stato iniziale per generazione pulsanti e comportamenti
+            // "fake" in fase di creazione (il record non e' ancora inserito nel db)
+            'initialStatusName' => end(explode('/', $workflowInitialStatusId)),
+            'initialStatus' => $workflowInitialStatusId,
+
+            // Stati da renderizzare obbligatoriamente in fase di creazione (quando il record non e' ancora inserito nel db)
+            'statusToRender' => $statusToRenderToHide['statusToRender'],
+            'hideSaveDraftStatus' => $statusToRenderToHide['hideDraftStatus'],
+
+            'draftButtons' => $draftButtons
         ]); ?>
     </div>
 

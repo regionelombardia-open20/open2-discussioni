@@ -1,26 +1,26 @@
 <?php
 
 /**
- * Lombardia Informatica S.p.A.
+ * Aria S.p.A.
  * OPEN 2.0
  *
  *
- * @package    lispa\amos\discussioni\models\search
+ * @package    open20\amos\discussioni\models\search
  * @category   CategoryName
  */
 
-namespace lispa\amos\discussioni\models\search;
+namespace open20\amos\discussioni\models\search;
 
-use lispa\amos\community\models\Community;
-use lispa\amos\core\interfaces\ContentModelSearchInterface;
-use lispa\amos\core\interfaces\SearchModelInterface;
-use lispa\amos\core\interfaces\CmsModelInterface;
-use lispa\amos\core\module\AmosModule;
-use lispa\amos\core\record\SearchResult;
-use lispa\amos\core\record\CmsField;
-use lispa\amos\discussioni\models\DiscussioniTopic;
-use lispa\amos\notificationmanager\base\NotifyWidget;
-use lispa\amos\notificationmanager\models\NotificationChannels;
+use open20\amos\community\models\Community;
+use open20\amos\core\interfaces\ContentModelSearchInterface;
+use open20\amos\core\interfaces\SearchModelInterface;
+use open20\amos\core\interfaces\CmsModelInterface;
+use open20\amos\core\module\AmosModule;
+use open20\amos\core\record\SearchResult;
+use open20\amos\core\record\CmsField;
+use open20\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\notificationmanager\base\NotifyWidget;
+use open20\amos\notificationmanager\models\NotificationChannels;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -31,8 +31,8 @@ use yii\helpers\ArrayHelper;
 
 /**
  * Class DiscussioniTopicSearch
- * DiscussioniTopicSearch represents the model behind the search form about `lispa\amos\discussioni\models\DiscussioniTopic`.
- * @package lispa\amos\discussioni\models\search
+ * DiscussioniTopicSearch represents the model behind the search form about `open20\amos\discussioni\models\DiscussioniTopic`.
+ * @package open20\amos\discussioni\models\search
  */
 
 class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInterface, ContentModelSearchInterface, CmsModelInterface
@@ -107,7 +107,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         //Switch off notification service for not readed discussion notifications
         $notify = $this->getNotifier();
         if ($notify) {
-            /** @var \lispa\amos\notificationmanager\AmosNotify 
+            /** @var \open20\amos\notificationmanager\AmosNotify 
               $notify */
             $this->getNotifier();
             $notify->notificationOff(Yii::$app->getUser()->id, DiscussioniTopic::className(), $query, NotificationChannels::CHANNEL_READ);
@@ -185,7 +185,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         $isSetCwh = $this->isSetCwh($moduleCwh, $classname);
         if ($isSetCwh) {
             $moduleCwh->setCwhScopeFromSession();
-            $cwhActiveQuery = new \lispa\amos\cwh\query\CwhActiveQuery(
+            $cwhActiveQuery = new \open20\amos\cwh\query\CwhActiveQuery(
                     $classname, [
                 'queryBase' => $query
             ]);
@@ -372,14 +372,28 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         if ($enableTagSearch) {
             $dataProvider->query->leftJoin('entitys_tags_mm e_tag', "e_tag.record_id=discussioni_topic.id AND e_tag.deleted_at IS NULL AND e_tag.classname='" . addslashes(DiscussioniTopic::className()) . "'");
 
-            if (Yii::$app->db->schema->getTableSchema('tag__translation')) {
-                // Esiste la tabella delle traduzioni dei TAG. Uso quella per la ricerca
-                $dataProvider->query->leftJoin('tag__translation tt', "e_tag.tag_id=tt.tag_id");
-                $tagTranslationSearch = true;
-            }
+//            if (Yii::$app->db->schema->getTableSchema('tag__translation')) {
+//                // Esiste la tabella delle traduzioni dei TAG. Uso quella per la ricerca
+//                $dataProvider->query->leftJoin('tag__translation tt', "e_tag.tag_id=tt.tag_id");
+//                $tagTranslationSearch = true;
+//            }
 
             $dataProvider->query->leftJoin('tag t', "e_tag.tag_id=t.id");
+            $tagsValues = \Yii::$app->request->get('tagValues');
+            if ($enableTagSearch) {
+                $arrayTagIds = [];
+                if(!empty($tagsValues)) {
+                    $tagIds = ArrayHelper::merge($arrayTagIds, explode(',', $tagsValues));
+                    $dataProvider->query->andFilterWhere(['t.id' => $tagIds]);
+                }
+            }
+            else {
+                if (!empty($tagsValues)) {
+                    $dataProvider->query->andWhere(0);
+                }
+            }
         }
+
 
         foreach ($searchParamsArray as $searchString) {
             $orQueries = [
@@ -387,13 +401,6 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
                 ['like', 'discussioni_topic.titolo', $searchString],
                 ['like', 'discussioni_topic.testo', $searchString],
             ];
-
-            if ($enableTagSearch) {
-                if ($tagTranslationSearch) {
-                    $orQueries[] = ['like', 'tt.nome', $searchString];
-                }
-                $orQueries[] = ['like', 't.nome', $searchString];
-            }
 
             $dataProvider->query->andWhere($orQueries);
         }
