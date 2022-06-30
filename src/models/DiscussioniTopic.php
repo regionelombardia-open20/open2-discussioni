@@ -35,6 +35,8 @@ use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
 use yii\log\Logger;
+use open20\amos\core\interfaces\ContentPublicationInteraface;
+
 
 /**
  * This is the model class for table "discussioni_topic".
@@ -51,7 +53,7 @@ use yii\log\Logger;
  * @property \open20\amos\comments\models\Comment[] $lastComments
  */
 class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInterface, CommentInterface, ViewModelInterface,
-    ModelImageInterface
+    ModelImageInterface, ContentPublicationInteraface
 {
     const DISCUSSIONI_WORKFLOW                   = 'DiscussioniTopicWorkflow';
     const DISCUSSIONI_WORKFLOW_STATUS_BOZZA      = 'DiscussioniTopicWorkflow/BOZZA';
@@ -852,4 +854,20 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     {
         return $this->tableName().'.primo_piano';
     }
+
+
+    /**
+     * Show if the content is visible
+     * used in particular to know if attachments file are visible
+     * @return boolean
+     */
+    public function isContentPublic(){
+        // isContentPublished si trova nel contentModel
+        $ok = $this->isContentPublished();
+        if($this->primo_piano && $ok){
+            return true;
+        }
+        return false;
+    }
+
 }

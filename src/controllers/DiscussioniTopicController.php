@@ -58,6 +58,14 @@ class DiscussioniTopicController extends CrudController
                 'allow' => true,
                 'actions' => [
                     'partecipa',
+                ],
+                'roles' => [
+                        'DISCUSSIONITOPIC_READ',
+                ]
+            ],
+            [
+                'allow' => true,
+                'actions' => [
                     'index',
                     'all-discussions',
                     'own-interest-discussions'
