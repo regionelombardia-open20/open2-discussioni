@@ -273,4 +273,8 @@ return [
     'Gestisci' => 'Gestisci',
     '#to_validate_label_manage' => 'Da validare',
     'Partecipate' => 'Partecipa',
+    'Non ci sono discussioni di tuo interesse!' => 'Non ci sono discussioni di tuo interesse!',
+    'Clicca e scopri tutte le discussioni della piattaforma' => 'Clicca e scopri tutte le discussioni della piattaforma',
+    'e scopri ora tutte le discussioni di' => 'e scopri ora tutte le discussioni di',
+    'Non sono presenti discussioni' => 'Non sono presenti discussioni'
 ];

@@ -270,4 +270,8 @@ return [
     'Nuova' => 'New',
     'Gestisci' => 'Manage',
     '#to_validate_label_manage' => 'To validate',
+    'Non ci sono discussioni di tuo interesse!' => 'There are no discussions of your interest!',
+    'Clicca e scopri tutte le discussioni della piattaforma' => 'Click and discover all threads of the platform',
+    'e scopri ora tutte le discussioni di' => 'and discover now all threads of',
+    'Non sono presenti discussioni' => 'There are no discussions'
 ];

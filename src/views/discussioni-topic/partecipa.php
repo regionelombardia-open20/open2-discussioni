@@ -36,7 +36,7 @@ if ($model->status != DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA) {
         'model' => $model,
         'workflowId' => DiscussioniTopic::DISCUSSIONI_WORKFLOW,
         'classDivMessage' => 'message',
-        'viewWidgetOnNewRecord' => true
+        'viewWidgetOnNewRecord' => true,
     ]);
 }
 
@@ -58,6 +58,7 @@ $reportModule = Yii::$app->getModule('report');
                     'model' => $model,
                     'publicationDateField' => 'created_at',
                     'showPrevalentPartnershipAndTargets' => true,
+                    'absoluteUrlAvatar' => true,
                 ]) ?>
                 <small><?= AmosDiscussioni::t('amosdiscussioni', '#published_at'); ?> <?= Yii::$app->formatter->asDatetime($model->created_at, 'humanalwaysdatetime') ?></small><br>
                 <small><?= AmosDiscussioni::t('amosdiscussioni', '#last_update'); ?>: <?= Yii::$app->formatter->asDatetime($model->updated_at) ?> </small>
@@ -72,7 +73,7 @@ $reportModule = Yii::$app->getModule('report');
             <?php
             $url = '/img/img_default.jpg';
             if (!is_null($model->discussionsTopicImage)) {
-                $url = $model->discussionsTopicImage->getUrl('original', false, true);
+                $url = $model->discussionsTopicImage->getWebUrl('original', false, true);
                 ?>
                 <?= Html::img($url, [
                     'class' => 'img-responsive img-discussione',
