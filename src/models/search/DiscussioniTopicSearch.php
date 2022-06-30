@@ -19,12 +19,15 @@ use open20\amos\core\record\SearchResult;
 use open20\amos\core\record\CmsField;
 use open20\amos\discussioni\models\DiscussioniTopic;
 use open20\amos\notificationmanager\base\NotifyWidget;
+use open20\amos\notificationmanager\models\NotificationChannels;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\db\ActiveQuery;
+use yii\di\Container;
 use yii\helpers\ArrayHelper;
+use open20\amos\discussioni\AmosDiscussioni;
 
 /**
  * Class DiscussioniTopicSearch
@@ -33,17 +36,15 @@ use yii\helpers\ArrayHelper;
  */
 class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInterface, ContentModelSearchInterface, CmsModelInterface
 {
+    private $container;
 
-    /**
-     * 
-     * @param array $config
-     */
     public function __construct(array $config = [])
     {
-        $this->isSearch = true;
+        $this->isSearch       = true;
+        $this->container      = new Container();
+        $this->container->set('notify', Yii::$app->getModule('notify'));
         parent::__construct($config);
-
-        $this->modelClassName = DiscussioniTopic::className();
+        $this->modelClassName = AmosDiscussioni::instance()->model('DiscussioniTopic');
     }
 
     /**
@@ -58,11 +59,11 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
     }
 
     /**
-     * bypass scenarios() implementation in the parent class
      * @inheritdoc
      */
     public function scenarios()
     {
+        // bypass scenarios() implementation in the parent class
         return Model::scenarios();
     }
 
@@ -76,10 +77,10 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         $behaviors = [];
         //if the parent model News is a model enabled for tags, NewsSearch will have TaggableBehavior too
         $moduleTag = \Yii::$app->getModule('tag');
-        if (isset($moduleTag) && in_array(DiscussioniTopic::className(), $moduleTag->modelsEnabled) && $moduleTag->behaviors) {
+        if (isset($moduleTag) && in_array($this->modelClassName, $moduleTag->modelsEnabled) && $moduleTag->behaviors) {
             $behaviors = ArrayHelper::merge($moduleTag->behaviors, $behaviors);
         }
-
+       
         return ArrayHelper::merge($parentBehaviors, $behaviors);
     }
 
@@ -95,7 +96,6 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         $this->setOrderVars($params);
 
         $query = DiscussioniTopic::find()->distinct();
-
         return $query;
     }
 
@@ -105,16 +105,19 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
      * @param int|null $limit
      * @return ActiveDataProvider
      */
-//    public function search($params, $queryType = null, $limit = null, $onlyDrafts = false, $saveQuery = false) {
-    public function search($params, $queryType = null, $limit = null, $onlyDrafts = false)
+    public function search($params, $queryType = null, $limit = null, $onlyDrafts = false, $pageSize = null)
     {
-        $query = $this->buildQuery($queryType, $params);
+        $query  = $this->buildQuery($queryType, $params);
         $query->limit($limit);
-
-//        if ($saveQuery === true) {
-//            \Yii::$app->session->set('_offQuery', $query);
-//        }
-
+        //Switch off notification service for not readed discussion notifications
+        $notify = $this->getNotifier();
+        if ($notify) {
+            /** @var \open20\amos\notificationmanager\AmosNotify 
+              $notify */
+            $this->getNotifier();
+            $notify->notificationOff(Yii::$app->getUser()->id, $this->modelClassName, $query,
+                NotificationChannels::CHANNEL_READ);
+        }
         $dp_params = ['query' => $query,];
         if ($limit) {
             $dp_params ['pagination'] = false;
@@ -129,30 +132,28 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
             $tagValues = $params[$this->formName()]['tagValues'];
             $this->setTagValues($tagValues);
             if (is_array($tagValues) && !empty($tagValues)) {
-                $andWhere = '';
+                $andWhere = "";
                 $i        = 0;
                 foreach ($tagValues as $rootId => $tagId) {
                     if (!empty($tagId)) {
                         if ($i == 0) {
-                            $i = 1;
-                            $query->innerJoin(
-                                'entitys_tags_mm entities_tag',
-                                "entities_tag.classname = '".addslashes(DiscussioniTopic::className())
-                                ."' AND entities_tag.record_id=discussioni_topic.id");
+                            $query->innerJoin('entitys_tags_mm entities_tag',
+                                "entities_tag.classname = '".
+                                addslashes($this->modelClassName)."' AND entities_tag.record_id=discussioni_topic.id");
                         } else {
-                            $andWhere .= ' OR ';
+                            $andWhere .= " OR ";
                         }
-
-                        $andWhere .= "(entities_tag.tag_id in (".$tagId
-                            .") AND entities_tag.root_id = ".$rootId
-                            ." AND entities_tag.deleted_at is null)";
+                        $andWhere .= "(entities_tag.tag_id in (".
+                            $tagId.") AND entities_tag.root_id = ".$rootId." AND entities_tag.deleted_at is null)";
+                        $i++;
                     }
                 }
+                $andWhere .= "";
                 if (!empty($andWhere)) {
                     $query->andWhere($andWhere);
                 }
             }
-        } 
+        }
 
         if (!($this->load($params) && $this->validate())) {
             return $dataProvider;
@@ -169,25 +170,22 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
             'version' => $this->version,
         ]);
 
-        $query
-            ->andFilterWhere(['like', 'titolo', $this->titolo])
+        $query->andFilterWhere(['like', 'titolo', $this->titolo])
             ->andFilterWhere(['like', 'testo', $this->testo]);
 
         return $dataProvider;
     }
 
     /**
-     * 
-     * @param type $queryType
-     * @param type $params
-     * @param type $onlyDrafts
-     * @return type
+     * @param string $queryType
+     * @param array $params
+     * @return ActiveQuery $query
      */
     public function buildQuery($queryType, $params, $onlyDrafts = false)
     {
         $query = $this->baseSearch($params);
 
-        $classname      = DiscussioniTopic::className();
+        $classname      = $this->modelClassName;
         $moduleCwh      = \Yii::$app->getModule('cwh');
         $cwhActiveQuery = null;
 
@@ -197,8 +195,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
             $cwhActiveQuery = new \open20\amos\cwh\query\CwhActiveQuery(
                 $classname, [
                 'queryBase' => $query
-                ]
-            );
+            ]);
         }
 
         switch ($queryType) {
@@ -253,7 +250,11 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
      */
     private function isSetCwh($moduleCwh, $classname)
     {
-        return (isset($moduleCwh) && in_array($classname, $moduleCwh->modelsEnabled));
+        if (isset($moduleCwh) && in_array($classname, $moduleCwh->modelsEnabled)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -286,7 +287,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
      */
     public function searchAll($params, $limit = null)
     {
-        return $this->search($params, 'all', $limit, false);
+        return $this->search($params, 'all', $limit);
     }
 
     /**
@@ -307,19 +308,20 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
      */
     public function searchOwnInterest($params, $limit = null)
     {
-        return $this->search($params, 'own-interest', $limit, false);
+        return $this->search($params, 'own-interest', $limit);
     }
 
     /**
-     * Solo le discussioni attive
-     * 
      * @param $params
      * @param null $limit
      * @return ActiveDataProvider
      */
     public function ultimeDiscussioni($params, $limit = null)
     {
-        return $this->searchAll($params, $limit);
+        // solo le discussioni attive
+        $dataProvider = $this->searchAll($params, $limit);
+
+        return $dataProvider;
     }
 
     /**
@@ -329,11 +331,10 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
      */
     public function discussioniInEvidenza($params, $limit = null)
     {
-        $query = $this->searchAll($params, $limit)->query;
+        $query        = $this->searchAll($params, $limit)->query;
         $query->andFilterWhere([
             'in_evidenza' => true
         ]);
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => [
@@ -348,19 +349,22 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
 
         return $dataProvider;
     }
-//    /**
-//     * @param $notifier
-//     */
-//    public function setNotifier(NotifyWidget $notifier) {
-//        $this->container->set('notify', $notifier);
-//    }
-//
-//    /**
-//     * @return $this
-//     */
-//    public function getNotifier() {
-//        return $this->container->get('notify');
-//    }
+
+    /**
+     * @param $notifier
+     */
+    public function setNotifier(NotifyWidget $notifier)
+    {
+        $this->container->set('notify', $notifier);
+    }
+
+    /**
+     * @return $this
+     */
+    public function getNotifier()
+    {
+        return $this->container->get('notify');
+    }
 
     /**
      * Search all validated documents
@@ -381,17 +385,11 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
 
         // Verifico se il modulo supporta i TAG e, in caso, ricerco anche fra quelli
         $moduleTag       = \Yii::$app->getModule('tag');
-        $enableTagSearch = isset($moduleTag) && in_array(DiscussioniTopic::className(), $moduleTag->modelsEnabled);
+        $enableTagSearch = isset($moduleTag) && in_array($this->modelClassName, $moduleTag->modelsEnabled);
 
         if ($enableTagSearch) {
-            $dataProvider
-                ->query
-                ->leftJoin(
-                    'entitys_tags_mm e_tag',
-                    "e_tag.record_id=discussioni_topic.id AND e_tag.deleted_at IS NULL AND e_tag.classname='"
-                    .addslashes(DiscussioniTopic::className())
-                    ."'"
-            );
+            $dataProvider->query->leftJoin('entitys_tags_mm e_tag',
+                "e_tag.record_id=discussioni_topic.id AND e_tag.deleted_at IS NULL AND e_tag.classname='".addslashes($this->modelClassName)."'");
 
 //            if (Yii::$app->db->schema->getTableSchema('tag__translation')) {
 //                // Esiste la tabella delle traduzioni dei TAG. Uso quella per la ricerca
@@ -414,8 +412,10 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
             }
         }
 
+
         foreach ($searchParamsArray as $searchString) {
-            $orQueries = ['or',
+            $orQueries = [
+                'or',
                 ['like', 'discussioni_topic.titolo', $searchString],
                 ['like', 'discussioni_topic.testo', $searchString],
             ];
@@ -427,7 +427,6 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         foreach ($dataProvider->models as $m) {
             array_push($searchModels, $this->convertToSearchResult($m));
         }
-
         $dataProvider->setModels($searchModels);
 
         return $dataProvider;
@@ -447,7 +446,6 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         $searchResult->data_pubblicazione = $model->created_at;
         $searchResult->immagine           = $model->discussionsTopicImage;
         $searchResult->abstract           = $model->testo;
-
         return $searchResult;
     }
 
@@ -464,16 +462,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         $this->load($params);
         $query        = $this->homepageDiscussioniQuery($params);
         $this->applySearchFilters($query);
-
-        if (!empty($params["conditionSearch"])) {
-            $commands = explode(";", $params["conditionSearch"]);
-            foreach ($commands as $command) {
-                $query->andWhere(eval("return " . $command . ";"));
-            }
-        }
-
         $query->limit($limit);
-        
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => [
@@ -482,7 +471,6 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
                 ],
             ],
         ]);
-
         return $dataProvider;
     }
 
@@ -494,28 +482,28 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
      */
     public function cmsSearchDiscussioniProgrammaStrategico($params, $limit = null)
     {
+
         $querycwhpubb = "
-            SELECT `content_id`
-            FROM `cwh_pubblicazioni` cp
-            JOIN `cwh_config_contents` ccc 
-                ON cp.`cwh_config_contents_id` = ccc.`id`
-                    AND ccc.`tablename` = '".DiscussioniTopic::tableName()."'
-            WHERE cp.`id` in (
-                SELECT a.`cwh_pubblicazioni_id` 
-                FROM `cwh_pubblicazioni_cwh_nodi_editori_mm` a 
-                JOIN `cwh_config` b 
-                on a.`cwh_config_id` = b.`id` and b.`tablename` = '".Community::tableName()."'
-                where a.`cwh_network_id` in (2604,1425,2602,2608)
-            )";
+			SELECT 
+				`content_id`
+			FROM `cwh_pubblicazioni` cp
+                        JOIN `cwh_config_contents` ccc 
+                        ON cp.`cwh_config_contents_id` = ccc.`id`
+			AND ccc.`tablename` = '".DiscussioniTopic::tableName()."'
+                        WHERE cp.`id` in (
+                            SELECT a.`cwh_pubblicazioni_id` 
+                            FROM `cwh_pubblicazioni_cwh_nodi_editori_mm` a 
+                            JOIN `cwh_config` b 
+                            on a.`cwh_config_id` = b.`id` and b.`tablename` = '".Community::tableName()."'
+                            where a.`cwh_network_id` in (2604,1425,2602,2608))
+        ";
 
         $paramsId = \Yii::$app->getDb()->createCommand($querycwhpubb)->queryAll();
         $ids      = [];
         foreach ($paramsId as $param) {
             $ids[] = $param['content_id'];
         }
-
         $this->load($params);
-
         $query        = $this->homepageDiscussioniProgrammaStrategicoQuery($params, $ids);
         $this->applySearchFilters($query);
         $query->limit($limit);
@@ -531,81 +519,28 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         return $dataProvider;
     }
 
-    /**
-     *
-     * @param type $params
-     * @param type $limit
-     * @return type
-     */
-    public function cmsSearchDiscussioniCommunity($params, $limit = null)
-    {
-        $community = "";
-        if (!empty($params['conditionSearch'])) {
-            $community = $params['conditionSearch'];
-        }
-
-        $querycwhpubb = "
-            SELECT `content_id`
-            FROM `cwh_pubblicazioni` cp
-            JOIN `cwh_config_contents` ccc
-                ON cp.`cwh_config_contents_id` = ccc.`id`
-                    AND ccc.`tablename` = '".DiscussioniTopic::tableName()."'
-            WHERE cp.`id` in (
-                SELECT a.`cwh_pubblicazioni_id`
-                FROM `cwh_pubblicazioni_cwh_nodi_editori_mm` a
-                JOIN `cwh_config` b
-                on a.`cwh_config_id` = b.`id` and b.`tablename` = '".Community::tableName()."'
-                where a.`cwh_network_id` in ($community)
-            )";
-
-        $paramsId = \Yii::$app->getDb()->createCommand($querycwhpubb)->queryAll();
-        $ids      = [];
-        foreach ($paramsId as $param) {
-            $ids[] = $param['content_id'];
-        }
-
-        //$this->load($params);
-
-        $query        = $this->homepageDiscussioniProgrammaStrategicoQuery($params, $ids);
-        $this->applySearchFilters($query);
-        $query->andWhere([DiscussioniTopic::tableName().'.primo_piano' => 1]);
-        $query->limit($limit);
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => [
-                'defaultOrder' => [
-                    'created_at' => SORT_DESC,
-                ],
-            ],
-        ]);
-
-        return $dataProvider;
-    }
-
-    /**
-     * 
-     * @return array
-     */
     public function cmsViewFields()
     {
-        return [
-            new CmsField("titolo", "TEXT", 'amosdiscussioni', $this->attributeLabels()['titolo']),
-            new CmsField("testo", "TEXT", 'amosdiscussioni', $this->attributeLabels()['testo']),
+        $viewFields = [];
+
+        array_push($viewFields, new CmsField("titolo", "TEXT", 'amosdiscussioni', $this->attributeLabels()['titolo']));
+        array_push($viewFields, new CmsField("testo", "TEXT", 'amosdiscussioni', $this->attributeLabels()['testo']));
+        array_push($viewFields,
             new CmsField("discussionsTopicImage", "IMAGE", 'amosdiscussioni',
-                $this->attributeLabels()['discussionsTopicImage'])
-        ];
+            $this->attributeLabels()['discussionsTopicImage']));
+
+
+        return $viewFields;
     }
 
-    /**
-     * 
-     * @return array
-     */
     public function cmsSearchFields()
     {
-        return [
-            new CmsField("titolo", "TEXT"),
-            new CmsField("testo", "TEXT"),
-        ];
+        $searchFields = [];
+
+        array_push($searchFields, new CmsField("titolo", "TEXT"));
+        array_push($searchFields, new CmsField("testo", "TEXT"));
+
+        return $searchFields;
     }
 
     /**
@@ -616,7 +551,6 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
     public function cmsIsVisible($id)
     {
         $retValue = true;
-
         return $retValue;
     }
 
@@ -628,15 +562,13 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         // Check if can use the custom module order
         if ($this->canUseModuleOrder()) {
             $dataProvider->setSort($this->createOrderClause());
-        } else {
-            // For widget graphic last news, order is incorrect without this else
+        } else { // For widget graphic last news, order is incorrect without this else
             $dataProvider->setSort([
                 'defaultOrder' => [
                     'created_at' => SORT_DESC
                 ]
             ]);
         }
-
         return $dataProvider;
     }
 
@@ -682,9 +614,11 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         $tableName = $this->tableName();
         $query     = $this->baseSearch($params)
             ->andWhere([
-                $tableName.'.status' => DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA,
-            ])
-            ->andWhere($tableName.'.primo_piano = 1');
+            $tableName.'.status' => DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA,
+        ]);
+        if (\Yii::$app->user->isGuest) {
+            $query->andWhere($tableName.'.primo_piano = 1');
+        }
 
         return $query;
     }
@@ -701,7 +635,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
                 ->andWhere([
                     $tableName.'.status' => DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA,
                 ])->andFilterWhere(['in', 'id', $paramsId]);
-
+        //->andWhere($tableName . '.primo_piano = 1');
         return $query;
     }
 }

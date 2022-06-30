@@ -10,7 +10,7 @@
  */
 
 namespace open20\amos\discussioni\models\base;
-use open20\amos\core\record\ContentModel;
+
 use open20\amos\discussioni\AmosDiscussioni;
 use open20\amos\notificationmanager\record\NotifyRecord;
 use yii\helpers\ArrayHelper;
@@ -41,7 +41,7 @@ use yii\helpers\ArrayHelper;
  * @property \open20\amos\discussioni\models\DiscussioniRisposte[] $discussioniRisposte
  * @property \open20\amos\comments\models\Comment[] $discussionComments
  */
-abstract class DiscussioniTopic extends ContentModel
+abstract class DiscussioniTopic extends \open20\amos\core\record\ContentModel
 {
     /**
      * @inheritdoc

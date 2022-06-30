@@ -17,6 +17,7 @@ use yii\data\ActiveDataProvider;
 
 /**
  * DiscussioniCommentiSearch represents the model behind the search form about `open20\amos\discussioni\models\DiscussioniCommenti`.
+ * @deprecated from version 1.5.
  */
 class DiscussioniCommentiSearch extends DiscussioniCommenti
 {

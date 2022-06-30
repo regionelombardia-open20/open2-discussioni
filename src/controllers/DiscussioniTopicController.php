@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -11,8 +10,9 @@
 
 namespace open20\amos\discussioni\controllers;
 
+use open20\amos\admin\AmosAdmin;
 use open20\amos\core\controllers\CrudController;
-use open20\amos\core\helpers\BreadcrumbHelper;
+use open20\amos\core\helpers\PositionalBreadcrumbHelper;
 use open20\amos\core\helpers\Html;
 use open20\amos\core\icons\AmosIcons;
 use open20\amos\dashboard\controllers\TabDashboardControllerTrait;
@@ -34,10 +34,10 @@ use open20\amos\core\widget\WidgetAbstract;
  * DiscussioniTopicController implements the CRUD actions for DiscussioniTopic model.
  * @package open20\amos\discussioni\controllers
  */
-class DiscussioniTopicController extends CrudController {
+class DiscussioniTopicController extends CrudController
+{
 
     use TabDashboardControllerTrait;
-
     /**
      * @var string $layout
      */
@@ -51,29 +51,24 @@ class DiscussioniTopicController extends CrudController {
     /**
      * @inheritdoc
      */
-    public function behaviors() {
+    public function behaviors()
+    {
         $behaviors = ArrayHelper::merge(
-            parent::behaviors(),
-            [
+                parent::behaviors(),
+                [
                 'access' => [
                     'class' => AccessControl::className(),
                     'rules' => [
                         [
                             'allow' => true,
-                            'actions' => [                               
+                            'actions' => [
+                                'partecipa',
                                 'index',
                                 'all-discussions',
                                 'own-interest-discussions'
                             ],
                             'roles' => ['LETTORE_DISCUSSIONI', 'AMMINISTRATORE_DISCUSSIONI', 'CREATORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI',
                                 'VALIDATORE_DISCUSSIONI']
-                        ],
-                        [
-                            'allow' => true,
-                            'actions' => [
-                                'partecipa',
-                            ],
-                            'roles' => ['DISCUSSIONITOPIC_READ']
                         ],
                         [
                             'allow' => true,
@@ -106,6 +101,28 @@ class DiscussioniTopicController extends CrudController {
                             ],
                             'roles' => ['AMMINISTRATORE_DISCUSSIONI']
                         ],
+                        [
+                            'allow' => true,
+                            'actions' => [
+                                ((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true) ? 'all-discussions'
+                                    : 'nothing'),
+                                ((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true) ? 'partecipa'
+                                    : 'nothingread')
+                            ],
+                            'matchCallback' => function ($rule, $action) {
+                                if ($action->id == 'all-discussions') return true;
+                                if ($action->id != 'partecipa') return false;
+                                $id = (!empty(\Yii::$app->request->get()['id']) ? Yii::$app->request->get()['id'] : null);
+                                if (!empty($id)) {
+                                    $model = DiscussioniTopic::findOne($id);
+
+                                    if (!empty($model) && $model->primo_piano == 1) {
+                                        return true;
+                                    }
+                                }
+                                return false;
+                            }
+                        ],
                     ]
                 ],
                 'verbs' => [
@@ -114,7 +131,7 @@ class DiscussioniTopicController extends CrudController {
                         'delete' => ['post', 'get']
                     ]
                 ]
-            ]
+                ]
         );
 
         return $behaviors;
@@ -123,7 +140,8 @@ class DiscussioniTopicController extends CrudController {
     /**
      * @inheritdoc
      */
-    public function init() {
+    public function init()
+    {
         $this->initDashboardTrait();
 
         $this->setModelObj(new DiscussioniTopic());
@@ -135,7 +153,7 @@ class DiscussioniTopicController extends CrudController {
 
         $this->viewList = [
             'name' => 'list',
-            'label' => AmosIcons::show('view-list') . Html::tag('p', AmosDiscussioni::t('amosdiscussioni', 'List')),
+            'label' => AmosIcons::show('view-list').Html::tag('p', AmosDiscussioni::t('amosdiscussioni', 'List')),
             'url' => '?currentView=list'
         ];
 
@@ -147,16 +165,24 @@ class DiscussioniTopicController extends CrudController {
 
         $this->viewGrid = [
             'name' => 'grid',
-            'label' => AmosIcons::show('view-list-alt') . Html::tag('p', AmosDiscussioni::t('amosdiscussioni', 'Table')),
+            'label' => AmosIcons::show('view-list-alt').Html::tag('p', AmosDiscussioni::t('amosdiscussioni', 'Table')),
             'url' => '?currentView=grid'
         ];
 
+
         $defaultViews = [
             'list' => $this->viewList,
-//            'icon' => $this->viewIcon,
-            'grid' => $this->viewGrid,
         ];
-        
+
+        if (Yii::$app->user->can('ADMIN')) {
+            $defaultViews = [
+                'list' => $this->viewList,
+//            'icon' => $this->viewIcon,
+                'grid' => $this->viewGrid,
+            ];
+        }
+
+
         $availableViews = [];
         foreach ($this->discussioniModule->defaultListViews as $view) {
             if (isset($defaultViews[$view])) {
@@ -174,11 +200,73 @@ class DiscussioniTopicController extends CrudController {
         $this->setUpLayout();
     }
 
+    public function beforeAction($action)
+    {
+        if (\Yii::$app->user->isGuest) {
+            $titleSection = AmosDiscussioni::t('amosdiscussioni', 'Discussioni');
+            $urlLinkAll   = '';
+
+            $ctaLoginRegister = Html::a(
+                    AmosDiscussioni::t('amosdiscussioni', 'accedi o registrati alla piattaforma'),
+                    isset(\Yii::$app->params['linkConfigurations']['loginLinkCommon']) ? \Yii::$app->params['linkConfigurations']['loginLinkCommon']
+                        : \Yii::$app->params['platform']['backendUrl'].'/'.AmosAdmin::getModuleName().'/security/login',
+                    [
+                    'title' => AmosDiscussioni::t('amosdiscussioni',
+                        'Clicca per accedere o registrarti alla piattaforma {platformName}',
+                        ['platformName' => \Yii::$app->name])
+                    ]
+            );
+            $subTitleSection  = Html::tag('p',
+                    AmosDiscussioni::t('amosdiscussioni',
+                        'Per partecipare alla creazione di nuove discussioni, {ctaLoginRegister}',
+                        ['ctaLoginRegister' => $ctaLoginRegister]));
+        } else {
+            $titleSection = AmosDiscussioni::t('amosdiscussioni', 'Discussioni');
+            $labelLinkAll = AmosDiscussioni::t('amosdiscussioni', 'Discussioni di mio interesse');
+            $urlLinkAll   = '/discussioni/discussioni-topic/own-interest-discussions';
+            $titleLinkAll = AmosDiscussioni::t('amosdiscussioni', 'Visualizza la lista delle discussioni');
+
+            $subTitleSection = Html::tag('p', AmosDiscussioni::t('amosdiscussioni', ''));
+        }
+
+        $labelCreate = AmosDiscussioni::t('amosdiscussioni', 'Nuova');
+        $titleCreate = AmosDiscussioni::t('amosdiscussioni', 'Crea una nuova discussione');
+        $labelManage = AmosDiscussioni::t('amosdiscussioni', 'Gestisci');
+        $titleManage = AmosDiscussioni::t('amosdiscussioni', 'Gestisci le discussioni');
+        $urlCreate   = '/discussioni/discussioni-topic/create';
+        $urlManage   = AmosDiscussioni::t('amosdiscussioni', '#');
+
+        $this->view->params = [
+            'isGuest' => \Yii::$app->user->isGuest,
+            'modelLabel' => 'discussioni',
+            'titleSection' => $titleSection,
+            'subTitleSection' => $subTitleSection,
+            'urlLinkAll' => $urlLinkAll,
+            'labelLinkAll' => $labelLinkAll,
+            'titleLinkAll' => $titleLinkAll,
+            'labelCreate' => $labelCreate,
+            'titleCreate' => $titleCreate,
+            'labelManage' => $labelManage,
+            'titleManage' => $titleManage,
+            'urlCreate' => $urlCreate,
+            'urlManage' => $urlManage,
+        ];
+
+        if (!parent::beforeAction($action)) {
+            return false;
+        }
+
+        // other custom code here
+
+        return true;
+    }
+
     /**
      * @param string|null $layout
      * @return string|\yii\web\Response
      */
-    public function actionIndex($layout = null) {
+    public function actionIndex($layout = null)
+    {
         return $this->redirect(['/discussioni/discussioni-topic/all-discussions']);
 
         $this->setUpLayout('list');
@@ -193,16 +281,16 @@ class DiscussioniTopicController extends CrudController {
         Url::remember();
 
         $this->setDataProvider($this->getModelSearch()->searchAll(Yii::$app->request->getQueryParams()));
-        
+
         $this->setListViewsParams();
         $this->setTitleAndBreadcrumbs(AmosDiscussioni::t('amosdiscussioni', 'Tutte le discussioni'));
 
         return $this->render('index',
                 [
-                    'dataProvider' => $this->getDataProvider(),
-                    'model' => $this->getModelSearch(),
-                    'currentView' => $this->getCurrentView(),
-                    'availableViews' => $this->getAvailableViews(),
+                'dataProvider' => $this->getDataProvider(),
+                'model' => $this->getModelSearch(),
+                'currentView' => $this->getCurrentView(),
+                'availableViews' => $this->getAvailableViews(),
         ]);
     }
 
@@ -210,7 +298,8 @@ class DiscussioniTopicController extends CrudController {
      * @param int $id Discussion id.
      * @return \yii\web\Response
      */
-    public function actionValidateDiscussion($id) {
+    public function actionValidateDiscussion($id)
+    {
         $discussione = DiscussioniTopic::findOne($id);
         try {
             $discussione->sendToStatus(DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA);
@@ -223,10 +312,10 @@ class DiscussioniTopicController extends CrudController {
             }
         } catch (WorkflowException $e) {
             Yii::$app->session->addFlash('danger', $e->getMessage());
-            
+
 //            return $this->redirect(Url::previous());
         }
-        
+
         return $this->redirect(Url::previous());
     }
 
@@ -234,7 +323,8 @@ class DiscussioniTopicController extends CrudController {
      * @param int $id Discussion id.
      * @return \yii\web\Response
      */
-    public function actionRejectDiscussion($id) {
+    public function actionRejectDiscussion($id)
+    {
         $discussione = DiscussioniTopic::findOne($id);
         try {
             $discussione->sendToStatus(DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_BOZZA);
@@ -250,20 +340,20 @@ class DiscussioniTopicController extends CrudController {
 //
 //                        return $this->redirect(Url::previous());
         }
-        
+
         return $this->redirect(Url::previous());
     }
 
     /**
      * Set a view param used in \open20\amos\core\forms\CreateNewButtonWidget
      */
-    private function setCreateNewBtnLabel() {
-        $urlCreateNew = array_key_exists("noWizardNewLayout", Yii::$app->params) 
-            ? '/discussioni/discussioni-topic/create' 
-            : '/discussioni/discussioni-topic-wizard/introduction';
+    private function setCreateNewBtnLabel()
+    {
+        $urlCreateNew = array_key_exists("noWizardNewLayout", Yii::$app->params) ? '/discussioni/discussioni-topic/create'
+                : '/discussioni/discussioni-topic-wizard/introduction';
 
         Yii::$app->view->params['createNewBtnParams'] = [
-            'createNewBtnLabel' => AmosDiscussioni::t('amosdiscussioni', 'Add new discussion'),
+            'createNewBtnLabel' => AmosDiscussioni::t('amosdiscussioni', 'Nuova'),
             'urlCreateNew' => $urlCreateNew
         ];
     }
@@ -271,7 +361,8 @@ class DiscussioniTopicController extends CrudController {
     /**
      * This method is useful to set all common params for all list views.
      */
-    protected function setListViewsParams() {
+    protected function setListViewsParams()
+    {
         $this->setCreateNewBtnLabel();
         Yii::$app->session->set(AmosDiscussioni::beginCreateNewSessionKey(), Url::previous());
     }
@@ -280,41 +371,44 @@ class DiscussioniTopicController extends CrudController {
      * Used for set page title and breadcrumbs.
      * @param string $disussionePageTitle Discussions page title (ie. Created by discussions, ...)
      */
-    private function setTitleAndBreadcrumbs($disussionePageTitle) {
+    private function setTitleAndBreadcrumbs($disussionePageTitle)
+    {
         $this->setNetworkDashboardBreadcrumb();
         Yii::$app->session->set('previousTitle', $disussionePageTitle);
         Yii::$app->session->set('previousUrl', Url::previous());
-        Yii::$app->view->title = $disussionePageTitle;
+        //Yii::$app->view->title = $disussionePageTitle;
         Yii::$app->view->params['breadcrumbs'][] = ['label' => $disussionePageTitle];
     }
 
     /**
-     * 
+     *
      */
-    public function setNetworkDashboardBreadcrumb() {
+    public function setNetworkDashboardBreadcrumb()
+    {
         /** @var \open20\amos\cwh\AmosCwh $moduleCwh */
         $moduleCwh = Yii::$app->getModule('cwh');
-        $scope = null;
+        $scope     = null;
         if (!empty($moduleCwh)) {
             $scope = $moduleCwh->getCwhScope();
         }
-        
+
         if (!empty($scope)) {
             if (isset($scope['community'])) {
-                $communityId = $scope['community'];
-                $community = \open20\amos\community\models\Community::findOne($communityId);
-                $dashboardCommunityTitle = AmosDiscussioni::t('amosdiscussioni', "Dashboard") . ' ' . $community->name;
-                $dasbboardCommunityUrl = Yii::$app->urlManager->createUrl(['community/join', 'id' => $communityId]);
+                $communityId                             = $scope['community'];
+                $community                               = \open20\amos\community\models\Community::findOne($communityId);
+                $dashboardCommunityTitle                 = AmosDiscussioni::t('amosdiscussioni', "Dashboard").' '.$community->name;
+                $dasbboardCommunityUrl                   = Yii::$app->urlManager->createUrl(['community/join', 'id' => $communityId]);
                 Yii::$app->view->params['breadcrumbs'][] = ['label' => $dashboardCommunityTitle, 'url' => $dasbboardCommunityUrl];
             }
         }
     }
 
     /**
-     * 
+     *
      * @return type
      */
-    public function actionCreatedBy() {
+    public function actionCreatedBy()
+    {
         $this->setUpLayout('list');
         $this->view->params['currentDashboard'] = $this->getCurrentDashboard();
 
@@ -329,23 +423,26 @@ class DiscussioniTopicController extends CrudController {
             'grid' => [
                 'name' => 'grid',
                 'label' => AmosDiscussioni::t('amosdiscussioni',
-                    '{iconaTabella}' . Html::tag('p', AmosDiscussioni::t('amosdiscussioni', 'Table')),
+                    '{iconaTabella}'.Html::tag('p', AmosDiscussioni::t('amosdiscussioni', 'Table')),
                     [
-                        'iconaTabella' => AmosIcons::show('view-list-alt')
+                    'iconaTabella' => AmosIcons::show('view-list-alt')
                 ]),
                 'url' => '?currentView=grid'
             ]
         ]);
         $this->setCurrentView($this->getAvailableView('grid'));
 
+        $this->view->params['titleSection'] = AmosDiscussioni::t('amosdiscusioni', 'Discussioni create da me');
+
         return parent::actionIndex();
     }
 
     /**
-     * 
+     *
      * @return type
      */
-    public function actionAllDiscussions() {
+    public function actionAllDiscussions()
+    {
         $this->setUpLayout('list');
         $this->view->params['currentDashboard'] = $this->getCurrentDashboard();
 
@@ -355,14 +452,22 @@ class DiscussioniTopicController extends CrudController {
 
         $this->setListViewsParams();
         $this->setTitleAndBreadcrumbs(AmosDiscussioni::t('amosdiscussioni', 'Tutte le discussioni'));
-
+        if (!\Yii::$app->user->isGuest) {
+            $this->view->params['titleSection'] = AmosDiscussioni::t('amosdiscussioni', 'Tutte le discussioni');
+            $this->view->params['labelLinkAll'] = AmosDiscussioni::t('amosdiscussioni', 'Discussioni di mio interesse');
+            $this->view->params['urlLinkAll']   = AmosDiscussioni::t('amosdiscussioni',
+                    '/discussioni/discussioni-topic/own-interest-discussions');
+            $this->view->params['titleLinkAll'] = AmosDiscussioni::t('amosdiscussioni',
+                    'Visualizza la lista delle discussioni di mio interesse');
+        }
         return parent::actionIndex();
     }
 
     /**
      * @return string
      */
-    public function actionAdminAllDiscussions() {
+    public function actionAdminAllDiscussions()
+    {
         $this->setUpLayout('list');
         $this->view->params['currentDashboard'] = $this->getCurrentDashboard();
 
@@ -372,6 +477,9 @@ class DiscussioniTopicController extends CrudController {
 
         $this->setListViewsParams();
         $this->setTitleAndBreadcrumbs(AmosDiscussioni::t('amosdiscussioni', 'Amministra discussioni'));
+        if (!\Yii::$app->user->isGuest) {
+            $this->view->params['titleSection'] = AmosDiscussioni::t('amosdiscussioni', 'Amministra discussioni');
+        }
 
         return parent::actionIndex();
     }
@@ -379,7 +487,8 @@ class DiscussioniTopicController extends CrudController {
     /**
      * @return string
      */
-    public function actionToValidateDiscussions() {
+    public function actionToValidateDiscussions()
+    {
         $this->setUpLayout('list');
         $this->view->params['currentDashboard'] = $this->getCurrentDashboard();
 
@@ -394,35 +503,48 @@ class DiscussioniTopicController extends CrudController {
             'grid' => [
                 'name' => 'grid',
                 'label' => AmosDiscussioni::t('amosdiscussioni',
-                    '{iconaTabella}' . Html::tag('p', AmosDiscussioni::t('amosdiscussioni', 'Table')),
+                    '{iconaTabella}'.Html::tag('p', AmosDiscussioni::t('amosdiscussioni', 'Table')),
                     [
-                        'iconaTabella' => AmosIcons::show('view-list-alt')
+                    'iconaTabella' => AmosIcons::show('view-list-alt')
                 ]),
                 'url' => '?currentView=grid'
             ]
         ]);
         $this->setCurrentView($this->getAvailableView('grid'));
 
+        if (!\Yii::$app->user->isGuest) {
+            $this->view->params['titleSection'] = AmosDiscussioni::t('amosdiscussioni', 'Discussioni da validare');
+        }
+
         return parent::actionIndex();
     }
 
     /**
-     * 
+     *
      * @return type
      */
-    public function actionOwnInterestDiscussions() {
-//        $this->setUpLayout('list');
+    public function actionOwnInterestDiscussions()
+    {
+        //        $this->setUpLayout('list');
         $this->view->params['currentDashboard'] = $this->getCurrentDashboard();
 
         Url::remember();
 
         $this->setDataProvider(
             $this->getModelSearch()
-            ->searchOwnInterest(Yii::$app->request->getQueryParams())
+                ->searchOwnInterest(Yii::$app->request->getQueryParams())
         );
 
         $this->setListViewsParams();
         $this->setTitleAndBreadcrumbs(AmosDiscussioni::t('amosdiscussioni', 'Discussioni di mio interesse'));
+
+
+        if (!\Yii::$app->user->isGuest) {
+            $this->view->params['titleSection'] = AmosDiscussioni::t('amosdiscussioni', 'Discussioni di mio interesse');
+            $this->view->params['urlLinkAll'] = '/discussioni/discussioni-topic/all-discussions';
+            $this->view->params['titleLinkAll'] = AmosDiscussioni::t('amosdiscussioni', 'Visualizza tutte le discussioni');
+            $this->view->params['labelLinkAll'] = AmosDiscussioni::t('amosdiscussioni', 'Tutte le discussioni');
+        }
 
         return parent::actionIndex();
     }
@@ -432,7 +554,8 @@ class DiscussioniTopicController extends CrudController {
      * @param integer $id
      * @return mixed
      */
-    public function actionView($id) {
+    public function actionView($id)
+    {
         /** @var DiscussioniTopic $model */
         $model = $this->findModel($id);
 
@@ -446,7 +569,7 @@ class DiscussioniTopicController extends CrudController {
                 ->all();
 
             $tagInteressi = [];
-            if(!empty($model->tagValues1)) {
+            if (!empty($model->tagValues1)) {
                 $tagIdInteressi = explode(",", $model->tagValues1);
                 foreach ($tagInteressiTutti as $value) {
                     if (in_array($value['id'], $tagIdInteressi)) {
@@ -460,9 +583,9 @@ class DiscussioniTopicController extends CrudController {
                 ->addOrderBy('root, lft')
                 ->asArray()
                 ->all();
-            
+
             $tagAmbitoLav = [];
-            if(!empty($model->tagValues2)) {
+            if (!empty($model->tagValues2)) {
                 $tagIdAmbitoLav = explode(",", $model->tagValues2);
                 foreach ($tagAmbitoLavTutti as $value) {
                     if (in_array($value['id'], $tagIdAmbitoLav)) {
@@ -476,25 +599,25 @@ class DiscussioniTopicController extends CrudController {
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->id, 'interessi' => $tagInteressi, 'ambitilav' => $tagAmbitoLav]);
         }
-        
+
         return $this->render(
-            'view', 
-            ['model' => $model]
+                'view', ['model' => $model]
         );
     }
 
     /**
      * Creates a new DiscussioniTopic model.
      * If creation is successful, the browser will be redirected to the 'view' page.
-     * 
+     *
      * $this->model is setup on init() function with $this->setModelObj(new DiscussioniTopic());
      * so it's un-usefull to recreate one!!!
-     * 
+     *
      * @return mixed
      */
-    public function actionCreate() {
+    public function actionCreate()
+    {
         $this->setUpLayout('form');
-        
+
         if ($this->model->load(Yii::$app->request->post())) {
             if ($this->model->validate()) {
                 $validateOnSave = true;
@@ -502,22 +625,21 @@ class DiscussioniTopicController extends CrudController {
                     $this->model->status = DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_BOZZA;
                     $this->model->save();
                     $this->model->status = DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_DAVALIDARE;
-                    $validateOnSave = false;
+                    $validateOnSave      = false;
                 }
-                
+
                 if ($this->model->status == DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA) {
                     $this->model->status = DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_BOZZA;
                     $this->model->save();
                     $this->model->status = DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA;
-                    $validateOnSave = false;
+                    $validateOnSave      = false;
                 }
-                
+
                 if ($this->model->save($validateOnSave)) {
                     Yii::$app->getSession()->addFlash(
-                        'success',
-                        AmosDiscussioni::t('amosdiscussioni', 'Discussione salvata con successo.')
+                        'success', AmosDiscussioni::t('amosdiscussioni', 'Discussione salvata con successo.')
                     );
-                    
+
                     return $this->redirectOnCreate($this->model);
                 } else {
                     Yii::$app->getSession()->addFlash(
@@ -534,57 +656,11 @@ class DiscussioniTopicController extends CrudController {
         }
 
         return $this->render(
-            'create',
-            [
+                'create', [
                 'model' => $this->model,
-            ]
+                ]
         );
     }
-
-//    /**
-//     * Creates a new DiscussioniTopic model.
-//     * If creation is successful, the browser will be redirected to the 'view' page.
-//     * @return mixed
-//     */
-//    public function actionCreate() {
-//        $this->setUpLayout('form');
-//        
-//        $model = new DiscussioniTopic();
-//        $this->model = $model;
-//
-//        if ($model->load(Yii::$app->request->post())) {
-//            if ($model->validate()) {
-//                $validateOnSave = true;
-//                if ($model->status == DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_DAVALIDARE) {
-//                    $model->status = DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_BOZZA;
-//                    $model->save();
-//                    $model->status = DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_DAVALIDARE;
-//                    $validateOnSave = false;
-//                }
-//                if ($model->status == DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA) {
-//                    $model->status = DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_BOZZA;
-//                    $model->save();
-//                    $model->status = DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA;
-//                    $validateOnSave = false;
-//                }
-//                if ($model->save($validateOnSave)) {
-//                    Yii::$app->getSession()->addFlash('success',
-//                        AmosDiscussioni::t('amosdiscussioni', 'Discussione salvata con successo.'));
-//                    return $this->redirectOnCreate($model);
-//                } else {
-//                    Yii::$app->getSession()->addFlash('danger',
-//                        AmosDiscussioni::t('amosdiscussioni', 'Si &egrave; verificato un errore durante il salvataggio'));
-//                }
-//            } else {
-//                Yii::$app->getSession()->addFlash('danger',
-//                    AmosDiscussioni::t('amosdiscussioni', 'Modifiche non salvate. Verifica l\'inserimento dei campi'));
-//            }
-//        }
-//
-//        return $this->render('create', [
-//                'model' => $model,
-//        ]);
-//    }
 
     /**
      * Updates an existing DiscussioniTopic model.
@@ -594,7 +670,8 @@ class DiscussioniTopicController extends CrudController {
      * @return string|\yii\web\Response
      * @throws \yii\web\NotFoundHttpException
      */
-    public function actionUpdate($id, $backToEditStatus = false) {
+    public function actionUpdate($id, $backToEditStatus = false)
+    {
         $this->setUpLayout('form');
 
         /** @var DiscussioniTopic $model */
@@ -621,7 +698,7 @@ class DiscussioniTopicController extends CrudController {
             if ($backToEditStatus && ($model->status != $model->getDraftStatus() && !Yii::$app->user->can('DiscussionValidate',
                     ['model' => $model]))) {
                 $model->status = $model->getDraftStatus();
-                $ok = $model->save(false);
+                $ok            = $model->save(false);
                 if (!$ok) {
                     Yii::$app->getSession()->addFlash('danger',
                         AmosDiscussioni::t('amosdiscussioni', 'Si &egrave; verificato un errore durante il salvataggio'));
@@ -630,10 +707,9 @@ class DiscussioniTopicController extends CrudController {
         }
 
         return $this->render(
-            'update', 
-            [
+                'update', [
                 'model' => $model,
-            ]
+                ]
         );
     }
 
@@ -644,13 +720,13 @@ class DiscussioniTopicController extends CrudController {
      * @return \yii\web\Response
      * @throws \yii\web\NotFoundHttpException
      */
-    public function actionDelete($id) {
+    public function actionDelete($id)
+    {
         $this->findModel($id)->delete();
         Yii::$app->getSession()->addFlash(
-            'success',
-            AmosDiscussioni::t('amosdiscussioni', 'Discussione cancellata correttamente.')
+            'success', AmosDiscussioni::t('amosdiscussioni', 'Discussione cancellata correttamente.')
         );
-        
+
         return $this->redirect(Url::previous());
     }
 
@@ -659,7 +735,8 @@ class DiscussioniTopicController extends CrudController {
      * @return string
      * @throws \yii\web\NotFoundHttpException
      */
-    public function actionPartecipa($id) {
+    public function actionPartecipa($id)
+    {
         $this->setUpLayout('main');
         Url::remember();
 
@@ -669,7 +746,6 @@ class DiscussioniTopicController extends CrudController {
         $model->detachBehavior('SeoContentBehavior');
         $model->detachBehavior('TimestampBehavior');
         $model->detachBehavior('BlameableBehavior');
-        $model->detachBehavior('NotifyBehavior');
         $model->hints++;
         $model->save(false);
 
@@ -679,22 +755,23 @@ class DiscussioniTopicController extends CrudController {
 
         $ultimaRisposta = $model->getDiscussionComments()->orderBy('id DESC')->one();
 
-        $query = $model->getDiscussionComments()->orderBy('id DESC');
+        $query      = $model->getDiscussionComments()->orderBy('id DESC');
         $countQuery = clone $query;
 
-        $pages = new Pagination(['totalCount' => $countQuery->count()]);
+        $pages               = new Pagination(['totalCount' => $countQuery->count()]);
         $pages->setPageSize(5);
         $discussioniRisposte = $query
             ->offset($pages->offset)
             ->limit($pages->limit)
             ->all();
 
-        return $this->render('partecipa', [
-            'model' => $model,
-            'discussioniRisposte' => $discussioniRisposte,
-            'pages' => $pages,
-            'ultimaRisposta' => $ultimaRisposta,
-            'listaAllegati' => $listaAllegati,
+        return $this->render('partecipa',
+                [
+                'model' => $model,
+                'discussioniRisposte' => $discussioniRisposte,
+                'pages' => $pages,
+                'ultimaRisposta' => $ultimaRisposta,
+                'listaAllegati' => $listaAllegati,
         ]);
     }
 
@@ -703,46 +780,47 @@ class DiscussioniTopicController extends CrudController {
      * @param null $previousStatus
      * @return \yii\web\Response
      */
-    protected function redirectOnUpdate($model, $previousStatus = null) {
+    protected function redirectOnUpdate($model, $previousStatus = null)
+    {
         // if you have the permission of update or you can validate the content you will be redirected on the update page
         // otherwise you will be redirected on the index page
         $redirectToUpdatePage = false;
-        
+
         if (Yii::$app->getUser()->can('DISCUSSIONITOPIC_UPDATE', ['model' => $model])) {
             $redirectToUpdatePage = true;
         }
-        
+
         if (Yii::$app->getUser()->can('DiscussionValidate', ['model' => $model])) {
             $redirectToUpdatePage = true;
         }
-        
+
         if ($redirectToUpdatePage) {
             Yii::$app->getSession()->addFlash(
-                'success',
-                AmosDiscussioni::t('amosdiscussioni', 'Discussione aggiornata con successo.')
+                'success', AmosDiscussioni::t('amosdiscussioni', 'Discussione aggiornata con successo.')
             );
-            
+
             if ($model->status == DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA) {
-                return $this->redirect(BreadcrumbHelper::lastCrumbUrl());
+                return $this->redirect(PositionalBreadcrumbHelper::lastCrumbUrl());
             } elseif (($model->status == DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_BOZZA) && ($previousStatus == DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_DAVALIDARE)) {
-                return $this->redirect(BreadcrumbHelper::lastCrumbUrl());
+                return $this->redirect(PositionalBreadcrumbHelper::lastCrumbUrl());
             } else {
                 return $this->redirect(['/discussioni/discussioni-topic/update', 'id' => $model->id]);
             }
         }
-        
+
         return $this->redirect(['/discussioni/discussioni-topic/own-interest-discussions']);
     }
 
     /**
-     * if you have the permission of update or you can validate the content 
-     * you will be redirected on the update page otherwise you will be redirected 
+     * if you have the permission of update or you can validate the content
+     * you will be redirected on the update page otherwise you will be redirected
      * on the index page with the contents created by you
-     * 
+     *
      * @param $model
      * @return \yii\web\Response
      */
-    protected function redirectOnCreate($model) {
+    protected function redirectOnCreate($model)
+    {
         $redirectToUpdatePage = false;
 
         if (Yii::$app->getUser()->can('DISCUSSIONITOPIC_UPDATE', ['model' => $model])) {
@@ -765,12 +843,65 @@ class DiscussioniTopicController extends CrudController {
      * @return string
      * @throws \yii\web\NotFoundHttpException
      */
-    public function actionPublic($id) {
-        $model = $this->findModel($id);
+    public function actionPublic($id)
+    {
+        $model        = $this->findModel($id);
         $this->layout = 'form';
         if ($this->isContentShared($id)) {
             return $this->render('public', ['model' => $model]);
         }
     }
 
+    /**
+     *
+     * @return array
+     */
+    public static function getManageLinks()
+    {
+
+        if(get_class(Yii::$app->controller) != 'open20\amos\discussioni\controllers\DiscussioniTopicController') {
+            $links[] = [
+                'title' => AmosDiscussioni::t('amosdiscussioni', 'Visualizza tutte le discussioni'),
+                'label' => AmosDiscussioni::t('amosdiscussioni', 'Tutte le discussioni'),
+                'url' => '/discussioni/discussioni-topic/all-discussions'
+            ];
+        }
+
+        if (\Yii::$app->user->can(\open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAll::class)) {
+            $links[] = [
+                'title' => AmosDiscussioni::t('amosdiscussioni', 'Visualizza tutte le discussioni'),
+                'label' => AmosDiscussioni::t('amosdiscussioni', 'Tutte le discussioni'),
+                'url' => '/discussioni/discussioni-topic/all-discussions'
+            ];
+        }
+
+        $links[] = [
+            'title' => AmosDiscussioni::t('amosdiscussioni', 'Visualizza discussioni create da me'),
+            'label' => AmosDiscussioni::t('amosdiscussioni', 'Create da me'),
+            'url' => '/discussioni/discussioni-topic/created-by'
+        ];
+
+        $links[] = [
+            'title' => AmosDiscussioni::t('amosdiscussioni', 'Visualizza discussioni di mio interesse'),
+            'label' => AmosDiscussioni::t('amosdiscussioni', 'Di mio interesse'),
+            'url' => '/discussioni/discussioni-topic/own-interest-discussions'
+        ];
+
+        if (\Yii::$app->user->can(\open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicDaValidare::class)) {
+            $links[] = [
+                'title' => AmosDiscussioni::t('amosdiscussioni', 'Visualizza discussioni da validare'),
+                'label' => AmosDiscussioni::t('amosdiscussioni', '#to_validate_label_manage'),
+                'url' => '/discussioni/discussioni-topic/to-validate-discussions'
+            ];
+        }
+
+        if (\Yii::$app->user->can(\open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicAdminAll::class)) {
+            $links[] = [
+                'title' => AmosDiscussioni::t('amosdiscussioni', 'Amministra tutte le discussioni'),
+                'label' => AmosDiscussioni::t('amosdiscussioni', 'Amministra'),
+                'url' => '/discussioni/discussioni-topic/admin-all-discussions'
+            ];
+        }
+        return $links;
+    }
 }

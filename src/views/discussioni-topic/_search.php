@@ -23,13 +23,14 @@ use open20\amos\admin\models\UserProfile;
  */
 
 $moduleTag = Yii::$app->getModule('tag');
+$discussioniModule = AmosDiscussioni::instance();
 $enableAutoOpenSearchPanel = !isset(\Yii::$app->params['enableAutoOpenSearchPanel']) 
     || \Yii::$app->params['enableAutoOpenSearchPanel'] === true;
 
 $currentView = Yii::$app->request->getQueryParam('currentView');
 ?>
 <div class="discussioni-topic-search element-to-toggle" data-toggle-element="form-search">
-    <div class="col-xs-12"><h2><?= AmosDiscussioni::tHtml('amosdiscussioni', 'Cerca per') ?>:</h2></div>
+    <div class="col-xs-12"><p class="h3"><?= AmosDiscussioni::tHtml('amosdiscussioni', 'Cerca per') ?>:</p></div>
 
     <?php $form = ActiveForm::begin([
         'action' => (isset($originAction) ? [$originAction] : ['index']),
@@ -53,8 +54,8 @@ $currentView = Yii::$app->request->getQueryParam('currentView');
         <?= $form->field($model, 'testo') ?>
     </div>
 
-    <div class="col-sm-6 col-lg-4">
-    <?= $form->field($model, 'created_by')->widget(\kartik\select2\Select2::className(), [
+   <!-- <div class="col-sm-6 col-lg-4">
+    < ?= $form->field($model, 'created_by')->widget(\kartik\select2\Select2::className(), [
         'data' => (!empty($model->created_by) 
             ? [$model->created_by => UserProfile::findOne(['user_id' => $model->created_by])->getNomeCognome()] 
             : []
@@ -73,19 +74,19 @@ $currentView = Yii::$app->request->getQueryParam('currentView');
     ?>
     </div>
 
-    <div class="col-sm-6 col-lg-4">
-        <?= $form->field($model, 'created_at')->widget(DateControl::className(), [
+     <div class="col-sm-6 col-lg-4">
+        < ?= $form->field($model, 'created_at')->widget(DateControl::className(), [
             'type' => DateControl::FORMAT_DATE
         ]) ?>
     </div>
 
     <div class="col-sm-6 col-lg-4">
-        <?= $form->field($model, 'updated_at')->widget(DateControl::className(), [
+        < ?= $form->field($model, 'updated_at')->widget(DateControl::className(), [
             'type' => DateControl::FORMAT_DATE
         ]) ?>
-    </div>
+    </div> -->
 
-    <?php if (isset($moduleTag) && in_array(DiscussioniTopic::className(), $moduleTag->modelsEnabled) && $moduleTag->behaviors): ?>
+    <?php if (isset($moduleTag) && in_array(DiscussioniTopic::className(), $moduleTag->modelsEnabled) && $discussioniModule->searchByTags && $moduleTag->behaviors): ?>
     <div class="col-xs-12">
     <?php
         $params = \Yii::$app->request->getQueryParams();

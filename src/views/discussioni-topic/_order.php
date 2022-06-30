@@ -23,7 +23,7 @@ $currentView = Yii::$app->request->getQueryParam('currentView');
 
 <div class="discussioni-topic-order element-to-toggle" data-toggle-element="form-order">
     <div class="col-xs-12">
-        <h2><?= AmosDiscussioni::t('amosdiscussioni', 'Ordina per') ?>:</h2>
+        <p class="h3"><?= AmosDiscussioni::t('amosdiscussioni', 'Ordina per') ?>:</p>
     </div>
 
     <?php $form = ActiveForm::begin([

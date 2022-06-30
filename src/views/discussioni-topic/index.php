@@ -16,6 +16,8 @@ use open20\amos\core\views\DataProviderView;
 use open20\amos\discussioni\AmosDiscussioni;
 use open20\amos\discussioni\models\DiscussioniTopic;
 use open20\amos\discussioni\widgets\DiscussionsCarouselWidget;
+use open20\amos\cwh\utility\CwhUtil;
+
 
 /**
  * @var yii\web\View $this
@@ -23,19 +25,54 @@ use open20\amos\discussioni\widgets\DiscussionsCarouselWidget;
  * @var open20\amos\discussioni\models\search\DiscussioniTopicSearch $model
  * @var string $currentView
  */
-//$this->title = AmosDiscussioni::t('amosdiscussioni', 'Discussioni');
+
 
 $actionColumnDefault = '{partecipa} {update} {delete}';
 $actionColumnToValidate = '{validate}{reject}';
 $actionColumn = $actionColumnDefault;
 if (Yii::$app->controller->action->id == 'to-validate-discussions') {
     $actionColumn = $actionColumnToValidate . $actionColumnDefault;
+    //cta:tutte
+    $this->title =[
+        //GESTIONE TITOLO
+        'titleSection' => 'Discussioni da validare',
+        //GESTIONE CTA
+        'labelCta' => 'Tutte le discussioni', //tutte o di mio interesse
+        'titleCta' => 'Visualizza la lista delle discussioni', //tutte o di mio interesse
+        'linkCta' =>'/discussioni/discussioni-topic/all-discussions', //tutte o di mio interesse
+        //GESTIONE +
+        'labelCreate' => 'Nuova',
+        'titleCreate' => 'Crea una nuova discussione',
+        'linkCreate' =>'/discussioni/discussioni-topic/create',
+        //GESTIONE MANAGE
+        'labelManage' => 'Gestisci',
+        'titleManage' =>'Gestisci le discussioni',
+        'linkManage' => '#',
+    ];
 }
 
 $module = \Yii::$app->getModule('discussioni');
 ?>
 
 <div class="discussions-topic-index">
+
+<!-- FILTRI RICERCA DA GRAFICARE -->
+
+<div>
+<?= $model->titolo ?>
+<?= $model->testo ?>
+<?php if(!is_null($model->created_by)) {
+			$creator = \open20\amos\core\user\User::findOne($model->created_by);
+			if(!empty($creator)) {
+				echo $creator->getProfile()->getNomeCognome();
+			}
+	   } ?>
+<?= (!empty($model->created_at)? \Yii::$app->getFormatter()->asDate($model->created_at) : '') ?>
+<?= (!empty($model->updated_at)? \Yii::$app->getFormatter()->asDate($model->updated_at) : '')?>
+<?= CwhUtil::getTagNames($model->tagValues); ?>
+</div>
+
+<!--FILRI RICERCA -->
 <?php
 
 echo $this->render('_search', [
@@ -154,7 +191,7 @@ $columns [] = [
             
             if (Yii::$app->getUser()->can('DiscussionValidate', ['model' => $model])) {
                 return ModalUtility::addConfirmRejectWithModal([
-                    'modalId' => 'validate-discussion-topic-modal-' . $model->id,
+                    'modalId' => 'validate-discussion-topic-modal-id-' . $model->id,
                     'modalDescriptionText' => AmosDiscussioni::t('amosdiscussioni', '#VALIDATE_DISCUSSION_MODAL_TEXT'),
                     'btnText' => AmosIcons::show('check-circle', ['class' => '']),
                     'btnLink' => Yii::$app->urlManager->createUrl([
@@ -169,7 +206,7 @@ $columns [] = [
             /** @var DiscussioniTopic $model */
             if (Yii::$app->getUser()->can('DiscussionValidate', ['model' => $model])) {
                 return ModalUtility::addConfirmRejectWithModal([
-                    'modalId' => 'reject-discussion-topic-modal-' . $model->id,
+                    'modalId' => 'reject-discussion-topic-modal-id-' . $model->id,
                     'modalDescriptionText' => AmosDiscussioni::t('amosdiscussioni', '#REJECT_DISCUSSION_MODAL_TEXT'),
                     'btnText' => AmosIcons::show('minus-circle', ['class' => '']),
                     'btnLink' => Yii::$app->urlManager->createUrl([
@@ -216,7 +253,8 @@ echo DataProviderView::widget([
         'enableExport' => true
     ],
     'listView' => [
-        'itemView' => '_item'
+        'itemView' => '_item',
+        
     ],
     'iconView' => [
         'itemView' => '_icon'
@@ -226,4 +264,5 @@ echo DataProviderView::widget([
     ]
 ]);
 ?>
+
 </div>

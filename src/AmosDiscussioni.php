@@ -22,35 +22,34 @@ use open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicCreatedBy;
 use open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicDaValidare;
 use Yii;
 use yii\console\Application;
+use yii\helpers\ArrayHelper;
+use open20\amos\core\interfaces\BreadcrumbInterface;
+
 
 /**
  * Class AmosDiscussioni
  * @package open20\amos\discussioni
  */
-class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModuleInterface, CmsModuleInterface
+class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModuleInterface, CmsModuleInterface, BreadcrumbInterface
 {
-   
+
     /**
      * @var bool $disableComments disable comments
      */
     public $disableComments = false;
-
-    /**
-     * @var array
-     */
-    public $viewPathEmailSummary = [
-        'open20\amos\discussioni\models\DiscussioniTopic' => '@vendor/open20/amos-discussioni/src/views/email/notify_summary'
-    ];
-
-    public $viewPathEmailSummaryNetwork = [
-        'open20\amos\discussioni\models\DiscussioniTopic' => '@vendor/open20/amos-discussioni/src/views/email/notify_summary_network'
-    ];
     
+    /**
+     * This param enables the search by tags
+     * @var bool $searchByTags
+     */
+    
+    public $searchByTags = false;
+
     const
         MAX_LAST_DISCUSSION_ON_DASHBOARD = 3;
 
     /**
-     * 
+     *
      */
     public
     // @var string $controllerNamespace the controller namespace
@@ -69,24 +68,15 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
         // @var string
         $defaultWidgetIndexUrl = '/discussioni/discussioni-topic/own-interest-discussions';
 
+    public $site_publish_enabled = false;
+
     /*
      * @var bool disableStandardWorkflow Disable standard worflow, direct publish
      */
     public $disableStandardWorkflow = false;
+    public $disableReportFlag = false;
 
-   /**
-    * @var bool values ad the same meaning of news module
-    */ 
-    public 
-       $site_featured_enabled = false;
-   
-    public 
-        $site_publish_enabled = false;
-    
-    public
-        $publication_always_enabled = false;
-   
-   
+
     /**
      * @param \yii\base\Application $app
      */
@@ -110,11 +100,15 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
             \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/commands', __DIR__ . '/commands/');
             \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
             //aggiunge le configurazioni trovate nel file config/config.php
-            Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
+            // Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
+            $config =  require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php');
+            \Yii::configure($this, ArrayHelper::merge($config, $this));
         } else {
             \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
             //aggiunge le configurazioni trovate nel file config/config.php
-            Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
+            // Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
+            $config =  require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php');
+            \Yii::configure($this, ArrayHelper::merge($config, $this));
         }
     }
 
@@ -127,7 +121,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     }
 
     /**
-     * 
+     *
      * @return type
      */
     public static function getModelSearchClassName()
@@ -136,7 +130,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     }
 
     /**
-     * 
+     *
      * @return type
      */
     public static function getModelClassName()
@@ -145,7 +139,7 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     }
 
     /**
-     * 
+     *
      * @return string
      */
     public static function getModuleIconName()
@@ -260,6 +254,69 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     public static function beginCreateNewSessionKey()
     {
         return 'beginCreateNewUrl_' . self::getModuleName();
+    }
+
+    /**
+     *
+     * @return string
+     */
+    public function getFrontEndMenu($dept = 1)
+    {
+        $menu = parent::getFrontEndMenu($dept);
+        $app  = \Yii::$app;
+        if ((is_null($app->user) || $app->user->id == $app->params['platformConfigurations']['guestUserId'])) {
+            $menu .= $this->addFrontEndMenu(AmosDiscussioni::t('amosdiscussioni','#menu_front_discussioni'), AmosDiscussioni::toUrlModule('/discussioni-topic/all-discussions'));
+        }else{
+            //$menu .= $this->addFrontEndMenu(AmosDiscussioni::t('amosdiscussioni','#menu_front_discussioni'), AmosDiscussioni::toUrlModule('/discussioni-topic/own-interest-discussions'));
+            $menu .= $this->addFrontEndMenu(AmosDiscussioni::t('amosdiscussioni','#menu_front_discussioni'), AmosDiscussioni::toUrlModule('/discussioni-topic/all-discussions'));
+        }
+        return $menu;
+    }
+
+    /**
+     * @return array
+     */
+    public function getIndexActions(){
+        return [
+            'discussioni-topic/index',
+            'discussioni-topic/all-discussions',
+            'discussioni-topic/created-by',
+            'discussioni-topic/admin-all-discussions',
+            'discussioni-topic/to-validate-discussions',
+            'discussioni-topic/own-interest-discussions'
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function defaultControllerIndexRoute()
+    {
+        return [
+            'discussioni-topic' => '/discussioni/discussioni-topic/own-interest-discussions',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function defaultControllerIndexRouteSlogged()
+    {
+        return [
+            'discussioni-topic' => '/discussioni/discussioni-topic/all-discussions',
+        ];
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getControllerNames(){
+        $names =  [
+            'discussioni-topic'  => self::t('amosdiscussioni', "Discussioni"),
+        ];
+
+        return $names;
     }
 
 }

@@ -46,79 +46,91 @@ $appController = Yii::$app->controller;
 $disableStandardWorkflow = $appController->discussioniModule->disableStandardWorkflow;
 
 $module = \Yii::$app->getModule('discussioni');
-$moduleNotify = \Yii::$app->getModule('notify');
+?>
 
-if (!$model->isNewRecord) {
-    echo WorkflowTransitionStateDescriptorWidget::widget([
+<?php if (!$model->isNewRecord) : ?>
+    <?= WorkflowTransitionStateDescriptorWidget::widget([
         'form' => $form,
         'model' => $model,
         'workflowId' => DiscussioniTopic::DISCUSSIONI_WORKFLOW,
         'classDivIcon' => '',
         'classDivMessage' => 'message',
         'viewWidgetOnNewRecord' => false
-    ]);
-}
+    ]); ?>
+<?php endif; ?>
 
-?>
-
-<div class="discussioni-form col-xs-12">
+<div class="discussioni-form">
     <div class="row">
-        <div class="col-xs-12">
-            <?= Html::tag('h2', AmosDiscussioni::t('amosdiscussioni', '#settings_general_title')
-                . CreatedUpdatedWidget::widget(['model' => $model, 'isTooltip' => true])
-                . ReportFlagWidget::widget([
-                    'model' => $model,
-                ]),
-                ['class' => 'subtitle-form'])
-            ?>
-        </div>
-
-        <div class="col-md-8 col-xs-12">
-            <?= $form->field($model, 'titolo')->textInput(['maxlength' => true, 'placeholder' => AmosDiscussioni::t('amosdiscussioni', '#title_field_plceholder')])->hint(AmosDiscussioni::t('amosdiscussioni', '#title_field_hint')) ?>
-            <?= $form->field($model, 'testo')->widget(TextEditorWidget::className(),
-                [
-                    'clientOptions' => [
-                        'placeholder' => AmosDiscussioni::t('amosdiscussioni', '#description_field_placeholder'),
-                        'lang' => substr(Yii::$app->language, 0, 2)
-                    ]
-                ]
-            ) ?>
-
-        </div>
-
-
-        <div class="col-md-4 col-xs-12">
-            <div class="col-xs-12 nop">
+        <!--contenuti multimediali-->
+        <div class="col-xs-12 section-form">
+            <h2 class="subtitle-form"><?= AmosDiscussioni::t('amosdiscussioni', 'Immagine principale') ?></h2>
+            <div>
                 <?= $form->field($model, 'discussionsTopicImage')->widget(CropInput::classname(), [
                     'jcropOptions' => ['aspectRatio' => '1.7']
                 ])->label(AmosDiscussioni::t('amosdiscussioni', '#image_field'))->hint(AmosDiscussioni::t('amosdiscussioni', '#image_field_hint')) ?>
             </div>
-
-            <div class="col-xs-12 attachment-section nop">
-                <div class="col-xs-12">
-                    <?= Html::tag('h2', AmosDiscussioni::t('amosdiscussioni', '#attachments_title')) ?>
-                    <?= $form->field($model,
-                        'discussionsAttachments')->widget(AttachmentsInput::classname(), [
-                        'options' => [ // Options of the Kartik's FileInput widget
-                            'multiple' => true, // If you want to allow multiple upload, default to false
-                        ],
-                        'pluginOptions' => [ // Plugin options of the Kartik's FileInput widget
-                            'maxFileCount' => 100,// Client max files,
-                            'showPreview' => false
-                        ]
-                    ])->label(AmosDiscussioni::t('amosdiscussioni', '#attachments_field'))->hint(AmosDiscussioni::t('amosdiscussioni', '#attachments_field_hint')) ?>
-                    <?= AttachmentsList::widget([
+        </div>
+        <!--informazioni generali-->
+        <div class="col-xs-12 section-form">
+            <?= Html::tag(
+                'h2',
+                AmosDiscussioni::t('amosdiscussioni', 'Informazioni di base')
+                    . CreatedUpdatedWidget::widget(['model' => $model, 'isTooltip' => true])
+                    . ReportFlagWidget::widget([
                         'model' => $model,
-                        'attribute' => 'discussionsAttachments'
-                    ]) ?>
-                </div>
+                    ]),
+                ['class' => 'subtitle-form']
+            )
+            ?>
+
+
+            <div>
+                <?= $form->field($model, 'titolo')->textInput(['maxlength' => true, 'placeholder' => AmosDiscussioni::t('amosdiscussioni', '#title_field_plceholder')])->hint(AmosDiscussioni::t('amosdiscussioni', '#title_field_hint')) ?>
+                <?= $form->field($model, 'testo')->widget(
+                    TextEditorWidget::className(),
+                    [
+                        'clientOptions' => [
+                            'placeholder' => AmosDiscussioni::t('amosdiscussioni', '#description_field_placeholder'),
+                            'lang' => substr(Yii::$app->language, 0, 2)
+                        ]
+                    ]
+                ) ?>
             </div>
+        </div>
+        <!--documenti e allegati-->
+        <div class="col-xs-12 section-form">
+
+            <div>
+                <h2 class="subtitle-form"><?= AmosDiscussioni::t('amosdiscussioni', '#attachments_title') ?></h2>
+
+                <?= $form->field(
+                    $model,
+                    'discussionsAttachments'
+                )->widget(AttachmentsInput::classname(), [
+                    'options' => [ // Options of the Kartik's FileInput widget
+                        'multiple' => true, // If you want to allow multiple upload, default to false
+                    ],
+                    'pluginOptions' => [ // Plugin options of the Kartik's FileInput widget
+                        'maxFileCount' => 100, // Client max files,
+                        'showPreview' => false
+                    ]
+                ])->label(AmosDiscussioni::t('amosdiscussioni', '#attachments_field'))->hint(AmosDiscussioni::t('amosdiscussioni', '#attachments_field_hint')) ?>
+                <?= AttachmentsList::widget([
+                    'model' => $model,
+                    'attribute' => 'discussionsAttachments'
+                ]) ?>
+            </div>
+
         </div>
     </div>
 
     <div class="row">
-        <div class="col-xs-12">
+        <div class="col-xs-12 section-form">
+        <div class="section-modalita-pubblicazione">
             <?= Html::tag('h2', AmosDiscussioni::t('amosdiscussioni', '#settings_receiver_title'), ['class' => 'subtitle-form']) ?>
+            <div class="row">
+                        <div class="col-xs-12">
+                            <div class="content-mod-pubb">
             <?php
 
             $showReceiverSection = false;
@@ -134,7 +146,7 @@ if (!$model->isNewRecord) {
             $showReceiverSection = isset($moduleTag) ? true : null;
 
             if ($showReceiverSection) : ?>
-                <div class="col-xs-12 receiver-section">
+                <div>
                     <?= DestinatariPlusTagWidget::widget([
                         'model' => $model,
                         'moduleCwh' => $moduleCwh,
@@ -143,76 +155,71 @@ if (!$model->isNewRecord) {
                     ?>
                 </div>
             <?php endif; ?>
-
-            <?php 
-            $publish_enabled = \Yii::$app->user->can('DISCUSSIONI_PUBLISHER_FRONTEND')
-                && !empty(AmosDiscussioni::instance()->publication_always_enabled);
-
-            $publish_enabled = $publish_enabled
-                ? $publish_enabled
-                : $publish_enabled && empty($scope) && !$pubblicatedForCommunity;
-
-            if (($publish_enabled) && (
-                (
-                    AmosDiscussioni::instance()->enable_foreground 
-                    && Yii::$app->user->can(AmosDiscussioni::instance()->foreground_permission
-                )
-                || AmosDiscussioni::instance()->site_publish_enabled
-                || AmosDiscussioni::instance()->site_featured_enabled
-                )
-            ))
-            : ?>
-            <div class="col-xs-12 receiver-section">
-                <div class="row">
-                    <h3 class="subtitle-section-form"><?= AmosNews::t('amosdiscussioni', "#pubblication_on_portal") ?>
-                        <em>(<?= AmosDiscussioni::t('amosdiscussioni', "#choose_publish_on_portal") ?>)</em>
-                    </h3>
-
-                    <div class="col-md-6 col-xs-12">
-                        <?= $form->field($model, 'primo_piano')->widget(Select::className(), [
-                            'auto_fill' => true,
-                            'data' => Html::getBooleanFieldsValues(),
-                            'options' => [
-                                'prompt' => AmosDiscussioni::t('amosdiscussioni', 'Seleziona'),
-                                'disabled' => false,
-                                'onchange' => "
-                                    if($(this).val() == 1) $('#discussionitopic-in_evidenza').prop('disabled', false);
-                                    if($(this).val() == 0) {
-                                        $('#discussionitopic-in_evidenza').prop('disabled', true);
-                                        $('#discussionitopic-in_evidenza').val(0);
-                                    }"
-                            ],
-                        ]); ?>
-                    </div>
-                    
-                    <?php if (AmosDiscussioni::instance()->site_publish_enabled ) : ?>
-                        <div class="col-md-6 col-xs-12">
-                        <?php //= $form->field($model, 'in_evidenza')->checkbox() ?>
-                        <?= $form->field($model, 'in_evidenza')->widget(Select::className(), [
-                            'auto_fill' => true,
-                            'data' => Html::getBooleanFieldsValues(),
-                            'options' => [
-                                'prompt' => AmosDiscussioni::t('amosnews', 'Seleziona'),
-                                'disabled' => ($model->primo_piano == 1 ? false : true)
-                            ]
-                        ]);
-                        ?>
+                            </div>
+                        </div>
+            <?php if (AmosDiscussioni::instance()->enable_foreground && Yii::$app->user->can(AmosDiscussioni::instance()->foreground_permission)) : ?>
+                <div class="col-xs-12">
+                    <div class="row">
+                        <h3 class="subtitle-section-form"><?= AmosNews::t('amosdiscussioni', "#pubblication_on_portal") ?>
+                            <em>(<?= AmosNews::t('amosdiscussioni', "#choose_publish_on_portal") ?>)</em>
+                        </h3>
+                        <div class="col-md-6">
+                            <?= $form->field($model, 'primo_piano')->widget(
+                                Select::className(),
+                                [
+                                    'auto_fill' => true,
+                                    'data' => Html::getBooleanFieldsValues(),
+                                    'options' => [
+                                        'prompt' => AmosNews::t('amosdiscussioni', 'Seleziona'),
+                                        'disabled' => false,
+                                    ],
+                                ]
+                            );
+                            ?>
+                        </div>
+                        <div class="col-md-6">
+                            <?php if (AmosDiscussioni::instance()->site_publish_enabled) : ?>
+                                <?=
+                                $form->field($model, 'in_evidenza')->widget(Select::className(), [
+                                    'auto_fill' => true,
+                                    'data' => Html::getBooleanFieldsValues(),
+                                    'options' => [
+                                        'prompt' => AmosDiscussioni::t('amosnews', 'Seleziona'),
+                                        // 'disabled' => ($model->primo_piano == 1 ? false : true)
+                                    ]
+                                ]);
+                                ?>
+                            <?php endif; ?>
                         </div>
                     </div>
-                <?php endif; ?>
-
                 </div>
-                <?php endif; ?>
-
-                <?php 
-                if (\Yii::$app->getModule('correlations')) {
-                    echo open2\amos\correlations\widget\ManageCorrelationsButtonWidget::widget([
-                        'model' => $model
-                    ]);
-                }
-                ?>
+            <?php endif; ?>
             </div>
         </div>
+        </div>
+
+        <div class="col-xs-12 note_asterisk">
+            <span><?= AmosDiscussioni::t('amosdiscussioni', '#required_field') ?></span>
+        </div>
+
+        <!-- <div class="col-md-12 col-sm-12 hidden">
+            < ?= $form->field($model, 'in_evidenza')->checkbox() ?>
+        </div> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         <?php
         $isCommunityManager = false;
@@ -225,13 +232,19 @@ if (!$model->isNewRecord) {
                 <?= Html::tag('h2', AmosDiscussioni::t('amosdiscussioni', '#settings_advance'), ['class' => 'subtitle-form']) ?>
                 <?php
 
-                echo Html::tag('div',
+                echo Html::tag(
+                    'div',
                     $form->field($model, 'close_comment_thread')->inline()->radioList(
                         [
                             true => AmosDiscussioni::t('amosdiscussioni', '#force_ok'),
                             false => AmosDiscussioni::t('amosdiscussioni', '#force_ko')
-                        ], ['class' => 'comment-choice'])->label(AmosDiscussioni::t('amosdiscussioni', '#close_comment_thread')
-                        , ['class' => 'col-md-8 col-xs-12']));
+                        ],
+                        ['class' => 'comment-choice']
+                    )->label(
+                        AmosDiscussioni::t('amosdiscussioni', '#close_comment_thread'),
+                        ['class' => 'col-md-8 col-xs-12']
+                    )
+                );
                 ?>
 
             </div>
@@ -240,35 +253,6 @@ if (!$model->isNewRecord) {
     </div>
 
     <div class="row">
-        <?php if ($moduleNotify && !empty($moduleNotify->enableNotificationContentLanguage) && $moduleNotify->enableNotificationContentLanguage) { ?>
-            <?php
-            $contentLanguage = "<div class=\"col-xs-6 nop\">" . \open20\amos\notificationmanager\widgets\NotifyContentLanguageWidget::widget(['model' => $model]) . "</div>"
-            ?>
-            <div class="col-xs-12">
-                <?=
-                AccordionWidget::widget([
-                    'items' => [
-                        [
-                            'header' => AmosDiscussioni::t('amosdiscussioni', '#settings_optional'),
-                            'content' => $contentLanguage . '<div class="clearfix"></div>',
-                        ]
-                    ],
-                    'headerOptions' => ['tag' => 'h2'],
-                    'clientOptions' => [
-                        'collapsible' => true,
-                        'active' => 'false',
-                        'icons' => [
-                            'header' => 'ui-icon-amos am am-plus-square',
-                            'activeHeader' => 'ui-icon-amos am am-minus-square',
-                        ]
-                    ],
-                ]);
-                ?>
-            </div>
-        <?php } ?>
-
-
-
         <?php
         $moduleSeo = Yii::$app->getModule('seo');
         if (isset($moduleSeo)) : ?>
@@ -283,7 +267,7 @@ if (!$model->isNewRecord) {
                         ]
                     ],
                     'headerOptions' => ['tag' => 'h2'],
-                    'options' => Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
+                    'options' =>  Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
                     'clientOptions' => [
                         'collapsible' => true,
                         'active' => 'false',
@@ -342,7 +326,8 @@ if (!$model->isNewRecord) {
             'viewWidgetOnNewRecord' => true,
             'closeButton' => Html::a(
                 AmosDiscussioni::t('amosdiscussioni', 'Annulla'),
-                Yii::$app->session->get('previousUrl'), ['class' => 'btn btn-secondary']
+                Yii::$app->session->get('previousUrl'),
+                ['class' => 'btn btn-secondary']
             ),
             // fisso lo stato iniziale per generazione pulsanti e comportamenti
             // "fake" in fase di creazione (il record non e' ancora inserito nel db)
@@ -355,7 +340,6 @@ if (!$model->isNewRecord) {
 
             'draftButtons' => $draftButtons
         ]); ?>
-
     </div>
 
     <?php ActiveForm::end(); ?>

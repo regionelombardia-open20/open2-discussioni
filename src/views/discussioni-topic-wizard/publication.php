@@ -20,6 +20,7 @@ use yii\base\Widget;
  * @var yii\widgets\ActiveForm $form
  */
 
+$discussioniModule = AmosDiscussioni::instance();
 $this->title = \open20\amos\discussioni\AmosDiscussioni::t('amosdiscussioni', '#discussions_wizard_page_title');
 
 ?>
@@ -50,7 +51,7 @@ $this->title = \open20\amos\discussioni\AmosDiscussioni::t('amosdiscussioni', '#
         <div class="row">
             <div class="col-xs-12">
                 <?php $moduleTag = Yii::$app->getModule('tag'); ?>
-                <?php if (isset($moduleTag) && in_array(get_class($model), $moduleTag->modelsEnabled) && $moduleTag->behaviors): ?>
+                <?php if (isset($moduleTag) && in_array(get_class($model), $moduleTag->modelsEnabled) && $discussioniModule->searchByTags && $moduleTag->behaviors): ?>
                     <?php /**@var \open20\amos\tag\AmosTag $moduleTag */ ?>
                     <?= \open20\amos\tag\widgets\TagWidget::widget([
                         'model' => $model,

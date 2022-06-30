@@ -21,7 +21,7 @@ class ModuleDiscussioniInterfacciaAsset extends AssetBundle
     public $css = [
         'less/discussions.less',
     ];
-    public $js = [
+    public $js = [ 
         'js/discussioni-interfaccia-js.js'
     ];
     public $depends = [
@@ -32,7 +32,7 @@ class ModuleDiscussioniInterfacciaAsset extends AssetBundle
         $moduleL = \Yii::$app->getModule('layout');
 
         if(!empty(\Yii::$app->params['dashboardEngine']) && \Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS){
-            $this->css = ['less/discussions_fullsize.less'];
+            $this->css = ['less/discussions_fullsize.less', 'less/discussions-design-bi.less'];
         }
 
         if(!empty($moduleL))

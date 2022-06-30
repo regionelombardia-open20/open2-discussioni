@@ -14,7 +14,7 @@ namespace open20\amos\discussioni\widgets\graphics;
 use open20\amos\core\widget\WidgetGraphic;
 use open20\amos\discussioni\AmosDiscussioni;
 use open20\amos\discussioni\models\search\DiscussioniTopicSearch;
-//use open20\amos\notificationmanager\base\NotifyWidgetDoNothing;
+use open20\amos\notificationmanager\base\NotifyWidgetDoNothing;
 use open20\amos\core\widget\WidgetAbstract;
 
 /**
@@ -43,13 +43,10 @@ class WidgetGraphicsUltimeDiscussioni extends WidgetGraphic {
    * @return string
    */
   public function getHtml() {
-//    $search = new DiscussioniTopicSearch();
-//    $search->setNotifier(new NotifyWidgetDoNothing());
-//    $listaTopic = $search->ultimeDiscussioni($_GET, AmosDiscussioni::MAX_LAST_DISCUSSION_ON_DASHBOARD);
+    $search = new DiscussioniTopicSearch();
+    $search->setNotifier(new NotifyWidgetDoNothing());
+    $listaTopic = $search->ultimeDiscussioni($_GET, AmosDiscussioni::MAX_LAST_DISCUSSION_ON_DASHBOARD);
     
-    $listaTopic = (new DiscussioniTopicSearch())
-        ->ultimeDiscussioni($_GET, AmosDiscussioni::MAX_LAST_DISCUSSION_ON_DASHBOARD);
-
     $viewPath = '@vendor/open20/amos-discussioni/src/widgets/graphics/views/';
     $viewToRender = $viewPath . 'ultime_discussioni';
     if (is_null(\Yii::$app->getModule('layout'))) {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -61,9 +62,75 @@ class WidgetIconDiscussioni extends WidgetIcon
 
         $this->setClassSpan(
             ArrayHelper::merge(
-                $this->getClassSpan(), $paramsClassSpan
+                $this->getClassSpan(),
+                $paramsClassSpan
             )
         );
+
+        if (Yii::$app instanceof Web) {
+            $this->setBulletCount(
+                $this->makeBulletCounter(
+                    Yii::$app->getUser()->getId()
+                )
+            );
+        }
+    }
+
+    /**
+     * 
+     * @param type $userId
+     * @param type $className
+     * @param type $externalQuery
+     * @return type
+     */
+    public function makeBulletCounter($userId = null, $className = null, $externalQuery = null)
+    {
+        return $this->getBulletCountChildWidgets($userId);
+    }
+
+    /**
+     * 
+     * @param type $user_id
+     * @return int - the sum of bulletCount internal widget
+     */
+    private function getBulletCountChildWidgets($userId = null)
+    {
+        /** @var AmosUserDashboards $userModuleDashboard */
+        $userModuleDashboard = AmosUserDashboards::findOne([
+            'user_id' => $userId,
+            'module' => AmosDiscussioni::getModuleName()
+        ]);
+
+        if (is_null($userModuleDashboard)) {
+            return 0;
+        }
+
+        $listWidgetChild = $userModuleDashboard->amosUserDashboardsWidgetMms;
+        if (is_null($listWidgetChild)) {
+            return 0;
+        }
+
+        /** @var AmosUserDashboardsWidgetMm $widgetChild */
+        $count = 0;
+        
+        $classNames = [];
+        foreach ($listWidgetChild as $widgetChild) {
+            if ($widgetChild->amos_widgets_classname != $this->getNamespace()) {
+                $classNames[] = $widgetChild->amos_widgets_classname;
+            }
+        }
+        
+        $amosWidgets = AmosWidgets::find([
+            'classname' => $classNames,
+            'type' => AmosWidgets::TYPE_ICON
+        ]);
+        
+        foreach ($amosWidgets as $widgetChild) {
+            $widget = \Yii::createObject($widgetChild->amos_widgets_classname);
+            $count += (int)$widget->getBulletCount();
+        }
+
+        return $count;
     }
 
     /**
@@ -73,7 +140,8 @@ class WidgetIconDiscussioni extends WidgetIcon
     public function getOptions()
     {
         return ArrayHelper::merge(
-                parent::getOptions(), ['children' => $this->getWidgetsIcon()]
+            parent::getOptions(),
+            ['children' => $this->getWidgetsIcon()]
         );
     }
 
@@ -96,4 +164,5 @@ class WidgetIconDiscussioni extends WidgetIcon
 
         return $widgets;
     }
+
 }

@@ -115,21 +115,20 @@ $listaModels = $listaTopic->getModels();
                                     </h2>
                                     <div class="box-widget-text">
                                         <?php
-                                         $stringNoTags = strip_tags($topic->testo);  
-//                                        $stringNoTags = $topic->testo;
-//                                        //remove table from editor
-//                                        //$stringNoTags = preg_replace('/<table(.*?)>(.*?)<\/table>/s', '', $stringNoTags);
-//                                        $stringNoTags = preg_replace('/<table(.*$)/s', '', $stringNoTags);
-//                                        // remove iframe from editor
-//                                        //$stringNoTags = preg_replace('/<iframe(.*?)>(.*?)<\/iframe>/s', '', $stringNoTags);
-//                                        $stringNoTags = preg_replace('/<iframe(.*$)/s', '', $stringNoTags);
-//                                        // remove images from editor
-//                                        //$stringNoTags = preg_replace('/<img(.*?)\/>/s', '', $stringNoTags);
-//                                        $stringNoTags = preg_replace('/<p><img(.*$)/s', '', $stringNoTags);
-//                                        // remove empty paragraph
-//                                        $stringNoTags = preg_replace('/<p><\/p>/s', '', $stringNoTags);
-//                                        // remove &nbsp; space
-//                                        $stringNoTags = str_replace('&nbsp;', '', $stringNoTags);
+                                        $stringNoTags = $topic->testo;
+                                        //remove table from editor
+                                        //$stringNoTags = preg_replace('/<table(.*?)>(.*?)<\/table>/s', '', $stringNoTags);
+                                        $stringNoTags = preg_replace('/<table(.*$)/s', '', $stringNoTags);
+                                        // remove iframe from editor
+                                        //$stringNoTags = preg_replace('/<iframe(.*?)>(.*?)<\/iframe>/s', '', $stringNoTags);
+                                        $stringNoTags = preg_replace('/<iframe(.*$)/s', '', $stringNoTags);
+                                        // remove images from editor
+                                        //$stringNoTags = preg_replace('/<img(.*?)\/>/s', '', $stringNoTags);
+                                        $stringNoTags = preg_replace('/<p><img(.*$)/s', '', $stringNoTags);
+                                        // remove empty paragraph
+                                        $stringNoTags = preg_replace('/<p><\/p>/s', '', $stringNoTags);
+                                        // remove &nbsp; space
+                                        $stringNoTags = str_replace('&nbsp;', '', $stringNoTags);
                                         if (strlen($stringNoTags) > 300) {
                                             $stringCut = substr($stringNoTags, 0, 300);
                                             echo substr($stringCut, 0, strrpos($stringCut, ' ')) . '... ';

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -51,21 +50,22 @@ use yii\log\Logger;
  * @property string $lastCommentDate
  * @property \open20\amos\comments\models\Comment[] $lastComments
  */
-class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInterface, CommentInterface, ViewModelInterface, ModelImageInterface
+class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInterface, CommentInterface, ViewModelInterface,
+    ModelImageInterface
 {
-    const DISCUSSIONI_WORKFLOW = 'DiscussioniTopicWorkflow';
-    const DISCUSSIONI_WORKFLOW_STATUS_BOZZA = 'DiscussioniTopicWorkflow/BOZZA';
+    const DISCUSSIONI_WORKFLOW                   = 'DiscussioniTopicWorkflow';
+    const DISCUSSIONI_WORKFLOW_STATUS_BOZZA      = 'DiscussioniTopicWorkflow/BOZZA';
     const DISCUSSIONI_WORKFLOW_STATUS_DAVALIDARE = 'DiscussioniTopicWorkflow/DAVALIDARE';
-    const DISCUSSIONI_WORKFLOW_STATUS_ATTIVA = 'DiscussioniTopicWorkflow/ATTIVA';
-    const DISCUSSIONI_WORKFLOW_STATUS_DISATTIVA = 'DiscussioniTopicWorkflow/DISATTIVA';
+    const DISCUSSIONI_WORKFLOW_STATUS_ATTIVA     = 'DiscussioniTopicWorkflow/ATTIVA';
+    const DISCUSSIONI_WORKFLOW_STATUS_DISATTIVA  = 'DiscussioniTopicWorkflow/DISATTIVA';
 
     /**
      * All the scenarios listed below are for the wizard.
      */
     const SCENARIO_INTRODUCTION = 'scenario_introduction';
-    const SCENARIO_DETAILS = 'scenario_details';
-    const SCENARIO_PUBLICATION = 'scenario_publication';
-    const SCENARIO_SUMMARY = 'scenario_summary';
+    const SCENARIO_DETAILS      = 'scenario_details';
+    const SCENARIO_PUBLICATION  = 'scenario_publication';
+    const SCENARIO_SUMMARY      = 'scenario_summary';
 
     /**
      * @var $distance
@@ -118,10 +118,22 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     public function init()
     {
         parent::init();
+        if (method_exists($this, 'getModuleObj')) {
+            if (empty($this->getModuleObj())) {
+                $moduleDisc = AmosDiscussioni::instance();
+                $this->setModuleObj($moduleDisc);
+            }
+            if (empty($this->getUsePrettyUrl())) {
+                if (!empty($this->moduleObj) && !empty($this->moduleObj->usePrettyUrl) && ($this->moduleObj->usePrettyUrl
+                    == true)) {
+                    $this->setUsePrettyUrl(true);
+                }
+            }
+        }
         if ($this->isNewRecord) {
             $this->status = $this->getWorkflowSource()->getWorkflow(self::DISCUSSIONI_WORKFLOW)->getInitialStatusId();
 
-            $this->setCloseCommentThread(0);
+            $this->setCloseCommentThread(false);
         }
     }
 
@@ -139,9 +151,10 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function rules()
     {
-        return ArrayHelper::merge(parent::rules(), [
-            [['discussionsTopicImage'], 'file', 'extensions' => 'jpeg, jpg, png, gif', 'maxFiles' => 1],
-            [['discussionsAttachments'], 'file', 'maxFiles' => 0],
+        return ArrayHelper::merge(parent::rules(),
+                [
+                [['discussionsTopicImage'], 'file', 'extensions' => 'jpeg, jpg, png, gif', 'maxFiles' => 1],
+                [['discussionsAttachments'], 'file', 'maxFiles' => 0],
         ]);
     }
 
@@ -150,10 +163,11 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function attributeLabels()
     {
-        return ArrayHelper::merge(parent::attributeLabels(), [
-            'regola_pubblicazione' => AmosDiscussioni::t('amosdiscussioni', 'Pubblicata per'),
-            'destinatari' => AmosDiscussioni::t('amosdiscussioni', 'Per l\'ente'),
-            'discussionsTopicImage' => AmosDiscussioni::t('amosdiscussioni', 'Discussion image'),
+        return ArrayHelper::merge(parent::attributeLabels(),
+                [
+                'regola_pubblicazione' => AmosDiscussioni::t('amosdiscussioni', 'Pubblicata per'),
+                'destinatari' => AmosDiscussioni::t('amosdiscussioni', 'Per l\'ente'),
+                'discussionsTopicImage' => AmosDiscussioni::t('amosdiscussioni', 'Discussion image'),
         ]);
     }
 
@@ -162,8 +176,8 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function scenarios()
     {
-        $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIO_DETAILS] = [
+        $scenarios                             = parent::scenarios();
+        $scenarios[self::SCENARIO_DETAILS]     = [
             'titolo',
             'testo',
             'discussionsTopicImage'
@@ -171,7 +185,7 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
         $scenarios[self::SCENARIO_PUBLICATION] = [
             'destinatari_pubblicazione',
         ];
-        $scenarios[self::SCENARIO_SUMMARY] = [
+        $scenarios[self::SCENARIO_SUMMARY]     = [
             'status'
         ];
         return $scenarios;
@@ -182,34 +196,35 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function behaviors()
     {
-        return ArrayHelper::merge(parent::behaviors(), [
-            'slug' => [
-                'class' => SluggableBehavior::className(),
-                'attribute' => 'titolo',
-                'ensureUnique' => true
+        return ArrayHelper::merge(parent::behaviors(),
+                [
+                'slug' => [
+                    'class' => SluggableBehavior::className(),
+                    'attribute' => 'titolo',
+                    'ensureUnique' => true
                 // 'slugAttribute' => 'slug',
-            ],
-            'fileBehavior' => [
-                'class' => FileBehavior::className()
-            ],
-            'workflow' => [
-                'class' => SimpleWorkflowBehavior::className(),
-                'defaultWorkflowId' => self::DISCUSSIONI_WORKFLOW,
-                'propagateErrorsToModel' => true,
-            ],
-            'workflowLog' => [
-                'class' => WorkflowLogFunctionsBehavior::className()
-            ],
-            'NotifyBehavior' => [
-                'class' => NotifyBehavior::className(),
-                'conditions' => [],
-            ],
-            'SeoContentBehavior' => [
-                'class' => SeoContentBehavior::className(),
-                'descriptionAttribute' => 'testo',
-                'imageAttribute' => 'discussionsTopicImage',
-                'schema' => 'SocialMediaPosting',
-            ]
+                ],
+                'fileBehavior' => [
+                    'class' => FileBehavior::className()
+                ],
+                'workflow' => [
+                    'class' => SimpleWorkflowBehavior::className(),
+                    'defaultWorkflowId' => self::DISCUSSIONI_WORKFLOW,
+                    'propagateErrorsToModel' => true,
+                ],
+                'workflowLog' => [
+                    'class' => WorkflowLogFunctionsBehavior::className()
+                ],
+                'NotifyBehavior' => [
+                    'class' => NotifyBehavior::className(),
+                    'conditions' => [],
+                ],
+                'SeoContentBehavior' => [
+                    'class' => SeoContentBehavior::className(),
+                    'descriptionAttribute' => 'testo',
+                    'imageAttribute' => 'discussionsTopicImage',
+                    'schema' => 'SocialMediaPosting',
+                ]
         ]);
     }
 
@@ -219,7 +234,6 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     public function afterFind()
     {
         parent::afterFind();
-
     }
 
     public function getModelImage()
@@ -255,7 +269,8 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      * @param bool $canCache
      * @return string
      */
-    public function getDiscussionsTopicImageUrl($size = 'original', $protected = true, $url = '/img/img_default.jpg', $absolute = false, $canCache = false)
+    public function getDiscussionsTopicImageUrl($size = 'original', $protected = true, $url = '/img/img_default.jpg',
+                                                $absolute = false, $canCache = false)
     {
         $discussionsTopicImage = $this->getDiscussionsTopicImage();
         if (!is_null($discussionsTopicImage)) {
@@ -271,7 +286,8 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     /**
      * @inheritdoc
      */
-    public function getModelImageUrl($size = 'original', $protected = true, $url = '/img/img_default.jpg', $absolute = false, $canCache = false)
+    public function getModelImageUrl($size = 'original', $protected = true, $url = '/img/img_default.jpg',
+                                     $absolute = false, $canCache = false)
     {
         return $this->getDiscussionsTopicImageUrl($size, $protected, $url, $absolute, $canCache);
     }
@@ -339,8 +355,11 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     protected function getLatitude()
     {
         /** @var User $UserIdentity */
+        if(\Yii::$app->user->isGuest){
+            return null;
+        }
         $UserIdentity = Yii::$app->getUser()->getIdentity();
-        $UserProfile = $UserIdentity->getUserProfile()->one();
+        $UserProfile  = $UserIdentity->getUserProfile()->one();
         return $UserProfile->domicilio_lat;
     }
 
@@ -349,9 +368,12 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     protected function getLongitude()
     {
+        if(\Yii::$app->user->isGuest){
+            return null;
+        }
         /** @var User $UserIdentity */
         $UserIdentity = Yii::$app->getUser()->getIdentity();
-        $UserProfile = $UserIdentity->getUserProfile()->one();
+        $UserProfile  = $UserIdentity->getUserProfile()->one();
         return $UserProfile->domicilio_lon;
     }
 
@@ -372,7 +394,8 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     public function getUtenteUltimaRisposta()
     {
         $modelClass = \open20\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
-        return $this->hasOne($modelClass::className(), ['user_id' => 'created_by'])->viaTable($this->getUltimaRisposta(), ['discussioni_topic_id' => 'id']);
+        return $this->hasOne($modelClass::className(), ['user_id' => 'created_by'])->viaTable($this->getUltimaRisposta(),
+                ['discussioni_topic_id' => 'id']);
     }
 
     /**
@@ -419,9 +442,9 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function avatarsUtenti()
     {
-        $avatars = [];
+        $avatars    = [];
         /** @var \yii\db\ActiveQuery $q */
-        $q = DiscussioniRisposte::find()->where(['discussioni_topic_id' => $this->id])->groupBy(['created_by'])->limit(4);
+        $q          = DiscussioniRisposte::find()->where(['discussioni_topic_id' => $this->id])->groupBy(['created_by'])->limit(4);
         $listRecord = $q->all();
         foreach ($listRecord as $record) {
             $usr = UserProfile::find()->where(['user_id' => $record->created_by])->one();
@@ -444,8 +467,9 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
                 'value' => function ($model) {
                     /** @var DiscussioniTopic $model */
                     $url = $model->getModelImageUrl();
-                    return Html::img($url, [
-                        'class' => 'gridview-image'
+                    return Html::img($url,
+                            [
+                            'class' => 'gridview-image'
                     ]);
                 },
                 'headerOptions' => [
@@ -567,8 +591,8 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     public function getLastComment()
     {
         return $this->hasOne(\open20\amos\comments\models\Comment::className(), ['context_id' => 'id'])
-            ->where(['created_at' => $this->getLastCommentDate()])
-            ->andWhere(['context' => \open20\amos\discussioni\models\DiscussioniTopic::className()]);
+                ->where(['created_at' => $this->getLastCommentDate()])
+                ->andWhere(['context' => \open20\amos\discussioni\models\DiscussioniTopic::className()]);
     }
 
     /**
@@ -578,8 +602,8 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     public function getLastCommentDate()
     {
         return $this->hasOne(\open20\amos\comments\models\Comment::className(), ['context_id' => 'id'])
-            ->andWhere(['context' => \open20\amos\discussioni\models\DiscussioniTopic::className()])
-            ->max('created_at');
+                ->andWhere(['context' => \open20\amos\discussioni\models\DiscussioniTopic::className()])
+                ->max('created_at');
     }
 
     /**
@@ -589,8 +613,8 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     public function getLastComments()
     {
         return $this->hasOne(\open20\amos\comments\models\Comment::className(), ['context_id' => 'id'])
-            ->andWhere(['context' => \open20\amos\discussioni\models\DiscussioniTopic::className()])
-            ->orderBy(['created_at' => SORT_DESC])->limit(3);
+                ->andWhere(['context' => \open20\amos\discussioni\models\DiscussioniTopic::className()])
+                ->orderBy(['created_at' => SORT_DESC])->limit(3);
     }
 
     /**
@@ -609,16 +633,38 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function commentsUsersAvatars()
     {
-        $avatars = [];
+        $avatars    = [];
         /** @var \yii\db\ActiveQuery $query */
-        $query = Comment::find()
+        $query      = Comment::find()
             ->andWhere(['context_id' => $this->id, 'context' => \open20\amos\discussioni\models\DiscussioniTopic::className()])
             ->groupBy(['created_by'])
             ->limit(4);
         $listRecord = $query->all();
         foreach ($listRecord as $record) {
             $modelClass = \open20\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
-            $usr = $modelClass::find()->where(['user_id' => $record->created_by])->one();
+            $usr        = $modelClass::find()->andWhere(['user_id' => $record->created_by])->one();
+            if ($usr) {
+                $avatars[] = $usr;
+            }
+        }
+        return $avatars;
+    }
+
+    /**
+     * @since 1.5 First time this was introduced.
+     * @return array
+     */
+    public function commentsUsersAvatarsAll()
+    {
+        $avatars    = [];
+        /** @var \yii\db\ActiveQuery $query */
+        $query      = Comment::find()
+            ->andWhere(['context_id' => $this->id, 'context' => \open20\amos\discussioni\models\DiscussioniTopic::className()])
+            ->groupBy(['created_by']);
+        $listRecord = $query->all();
+        foreach ($listRecord as $record) {
+            $modelClass = \open20\amos\admin\AmosAdmin::instance()->createModel('UserProfile');
+            $usr        = $modelClass::find()->andWhere(['user_id' => $record->created_by])->one();
             if ($usr) {
                 $avatars[] = $usr;
             }
@@ -655,29 +701,31 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
         return $ret;
     }
 
-
     /**
      * @return array
      */
     public function getStatsToolbar($disableLink = false)
     {
-        $panels = [];
+        $panels         = [];
         $count_comments = 0;
         return $panels;
         try {
-            $panels = parent::getStatsToolbar($disableLink);
+            $panels     = parent::getStatsToolbar($disableLink);
             $filescount = !is_null($this->discussionsTopicImage) ? $this->getFileCount() - 1 : $this->getFileCount();
-            $panels = ArrayHelper::merge($panels, StatsToolbarPanels::getDocumentsPanel($this, $filescount, $disableLink));
+            $panels     = ArrayHelper::merge($panels,
+                    StatsToolbarPanels::getDocumentsPanel($this, $filescount, $disableLink));
             if ($this->isCommentable()) {
                 $commentModule = \Yii::$app->getModule('comments');
                 if ($commentModule) {
                     /** @var \open20\amos\comments\AmosComments $commentModule */
                     $count_comments = $commentModule->countComments($this);
                 }
-                $panels = ArrayHelper::merge($panels, StatsToolbarPanels::getCommentsPanel($this, $count_comments, $disableLink));
+                $panels = ArrayHelper::merge($panels,
+                        StatsToolbarPanels::getCommentsPanel($this, $count_comments, $disableLink));
             }
             $reportCount = count(ReportUtil::retrieveReports(get_class($this), $this->id));
-            $panels = ArrayHelper::merge($panels, StatsToolbarPanels::getReportsPanel($this, $reportCount, $disableLink));
+            $panels      = ArrayHelper::merge($panels,
+                    StatsToolbarPanels::getReportsPanel($this, $reportCount, $disableLink));
         } catch (\Exception $ex) {
             Yii::getLogger()->log($ex->getMessage(), Logger::LEVEL_ERROR);
         }
@@ -713,7 +761,11 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function getFullViewUrl()
     {
-        return Url::toRoute(["/" . $this->getViewUrl(), "id" => $this->id]);
+        if (!empty($this->usePrettyUrl) && ($this->usePrettyUrl == true)) {
+            return Url::toRoute(["/".$this->getViewUrl()."/".$this->id."/".$this->getPrettyUrl()]);
+        } else {
+            return Url::toRoute(["/".$this->getViewUrl(), "id" => $this->id]);
+        }
     }
 
     /**
@@ -732,15 +784,15 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
         return [$this->getValidatedStatus()];
     }
 
-
     /**
      * @return array
      */
     public function getStatusToRenderToHide()
     {
 
-        $statusToRender = [
-            DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_BOZZA => AmosDiscussioni::t('amosdiscussioni', 'Modifica in corso'),
+        $statusToRender     = [
+            DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_BOZZA => AmosDiscussioni::t('amosdiscussioni',
+                'Modifica in corso'),
         ];
         $isCommunityManager = false;
         if (\Yii::$app->getModule('community')) {
@@ -751,12 +803,15 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
         }
         // if you are a community manager a validator/facilitator or ADMIN you Can publish directly
         if (Yii::$app->user->can('DiscussionValidate', ['model' => $this]) || Yii::$app->user->can('ADMIN') || $isCommunityManager) {
-            $statusToRender = ArrayHelper::merge($statusToRender,
-                [DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA => AmosDiscussioni::t('amosdiscussioni', 'Pubblicata')]);
+            $statusToRender  = ArrayHelper::merge($statusToRender,
+                    [DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA => AmosDiscussioni::t('amosdiscussioni',
+                        'Pubblicata')]);
             $hideDraftStatus = [];
         } else {
-            $statusToRender = ArrayHelper::merge($statusToRender, [
-                DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_DAVALIDARE => AmosDiscussioni::t('amosdiscussioni', 'Richiedi pubblicazione'),
+            $statusToRender    = ArrayHelper::merge($statusToRender,
+                    [
+                    DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_DAVALIDARE => AmosDiscussioni::t('amosdiscussioni',
+                        'Richiedi pubblicazione'),
             ]);
             $hideDraftStatus[] = DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA;
         }
@@ -770,13 +825,13 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     {
         return '';
     }
-    
-        
+
     /**
      * @inheritdoc
      * @return type
      */
-    public function getCloseCommentThread() {
+    public function getCloseCommentThread()
+    {
         return $this->close_comment_thread;
     }
 
@@ -784,16 +839,17 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      * @inheritdoc
      * @param type $closeCommentThread
      */
-    public function setCloseCommentThread($closeCommentThread) {
+    public function setCloseCommentThread($closeCommentThread)
+    {
         $this->close_comment_thread = $closeCommentThread;
     }
 
     /**
-     * Testo del bottone delle notifiche
-     * @return type
+     *
+     * @return string
      */
-    public function getNotifyTextButton(){
-        return AmosDiscussioni::t('amosdiscussioni', 'Rispondi');
+    public function getFieldVisibleByGuest()
+    {
+        return $this->tableName().'.primo_piano';
     }
-
 }

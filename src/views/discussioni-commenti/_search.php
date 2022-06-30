@@ -21,7 +21,7 @@ use yii\widgets\ActiveForm;
 ?>
 
 <div class="discussioni-commenti-search element-to-toggle" data-toggle-element="form-search">
-    <div class="col-xs-12"><h2><?= AmosDiscussioni::tHtml('amosdiscussioni', 'Cerca per') ?>:</h2></div>
+    <div class="col-xs-12"><p class="h3"><?= AmosDiscussioni::tHtml('amosdiscussioni', 'Cerca per') ?>:</p></div>
     <?php $form = ActiveForm::begin([
         'action' => ['index'],
         'method' => 'get',
