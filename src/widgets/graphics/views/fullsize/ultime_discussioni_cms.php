@@ -5,7 +5,7 @@
  * OPEN 2.0
  *
  *
- * @package    open20\amos\discussioni
+ * @package    open20\amos\discussioni\widgets\graphics\views\fullsize
  * @category   CategoryName
  */
 
@@ -35,8 +35,7 @@ $userModule = CurrentUser::getUserProfile();
 <?php
 $modelLabel = 'discussioni';
 
-$titleSection = AmosDiscussioni::t('amosdiscussioni', 'Discussioni');
-$urlLinkAll = AmosDiscussioni::t('amosdiscussioni', '/discussioni/discussioni-topic/all-discussions');
+$urlLinkAll = '/discussioni/discussioni-topic/all-discussions';
 $labelLinkAll = AmosDiscussioni::t('amosdiscussioni', 'Tutte le discussioni');
 $titleLinkAll = AmosDiscussioni::t('amosdiscussioni', 'Visualizza la lista delle discussioni');
 
@@ -44,7 +43,7 @@ $labelCreate = AmosDiscussioni::t('amosdiscussioni', 'Nuova');
 $titleCreate = AmosDiscussioni::t('amosdiscussioni', 'Crea una nuova discussione');
 $labelManage = AmosDiscussioni::t('amosdiscussioni', 'Gestisci');
 $titleManage = AmosDiscussioni::t('amosdiscussioni', 'Gestisci le discussioni');
-$urlCreate = AmosDiscussioni::t('amosdiscussioni', '/discussioni/discussioni-topic/create');
+$urlCreate = '/discussioni/discussioni-topic/create';
 
 $manageLinks = [];
 $controller = \open20\amos\discussioni\controllers\DiscussioniTopicController::class;
@@ -68,8 +67,7 @@ if (isset($moduleCwh) && !empty($moduleCwh->getCwhScope())) {
                 'isGuest' => \Yii::$app->user->isGuest,
                 'isSetScope' => $isSetScope,
                 'modelLabel' => 'discussioni',
-                'titleSection' => $titleSection,
-                'subTitleSection' => $subTitleSection,
+                'titleSection' => $widget->getLabel(),
                 'urlLinkAll' => $urlLinkAll,
                 'labelLinkAll' => $labelLinkAll,
                 'titleLinkAll' => $titleLinkAll,

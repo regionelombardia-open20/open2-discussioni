@@ -12,9 +12,10 @@ namespace open20\amos\discussioni\controllers;
 
 use open20\amos\admin\AmosAdmin;
 use open20\amos\core\controllers\CrudController;
-use open20\amos\core\helpers\PositionalBreadcrumbHelper;
 use open20\amos\core\helpers\Html;
+use open20\amos\core\helpers\PositionalBreadcrumbHelper;
 use open20\amos\core\icons\AmosIcons;
+use open20\amos\core\widget\WidgetAbstract;
 use open20\amos\dashboard\controllers\TabDashboardControllerTrait;
 use open20\amos\discussioni\AmosDiscussioni;
 use open20\amos\discussioni\assets\ModuleDiscussioniInterfacciaAsset;
@@ -27,7 +28,6 @@ use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
-use open20\amos\core\widget\WidgetAbstract;
 
 /**
  * Class DiscussioniTopicController
@@ -36,8 +36,8 @@ use open20\amos\core\widget\WidgetAbstract;
  */
 class DiscussioniTopicController extends CrudController
 {
-
     use TabDashboardControllerTrait;
+    
     /**
      * @var string $layout
      */
@@ -47,83 +47,103 @@ class DiscussioniTopicController extends CrudController
      * @var AmosDiscussioni|null $discussioniModule
      */
     public $discussioniModule = null;
-
+    
     /**
      * @inheritdoc
      */
     public function behaviors()
     {
+        $rules = [
+            [
+                'allow' => true,
+                'actions' => [
+                    'partecipa',
+                    'index',
+                    'all-discussions',
+                    'own-interest-discussions'
+                ],
+                'roles' => [
+                    'LETTORE_DISCUSSIONI',
+                    'AMMINISTRATORE_DISCUSSIONI',
+                    'CREATORE_DISCUSSIONI',
+                    'FACILITATORE_DISCUSSIONI',
+                    'VALIDATORE_DISCUSSIONI'
+                ]
+            ],
+            [
+                'allow' => true,
+                'actions' => [
+                    'created-by',
+                ],
+                'roles' => [
+                    'CREATORE_DISCUSSIONI',
+                    'AMMINISTRATORE_DISCUSSIONI',
+                    'FACILITATORE_DISCUSSIONI'
+                ]
+            ],
+            [
+                'allow' => true,
+                'actions' => [
+                    'validate-discussion',
+                    'reject-discussion',
+                ],
+                'roles' => [
+                    'AMMINISTRATORE_DISCUSSIONI',
+                    'FACILITATORE_DISCUSSIONI', 'FACILITATOR',
+                    'DiscussionValidateOnDomain',
+                    'VALIDATORE_DISCUSSIONI'
+                ]
+            ],
+            [
+                'allow' => true,
+                'actions' => [
+                    'to-validate-discussions'
+                ],
+                'roles' => [
+                    'VALIDATORE_DISCUSSIONI',
+                    'FACILITATORE_DISCUSSIONI',
+                    'AMMINISTRATORE_DISCUSSIONI',
+                    'DiscussionValidateOnDomain'
+                ]
+            ],
+            [
+                'allow' => true,
+                'actions' => [
+                    'admin-all-discussions'
+                ],
+                'roles' => ['AMMINISTRATORE_DISCUSSIONI']
+            ],
+        ];
+        if (!$this->discussioniModule->disableBefeControllerRules) {
+            $rules[] = [
+                'allow' => true,
+                'actions' => [
+                    ((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true) ? 'all-discussions'
+                        : 'nothing'),
+                    ((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true) ? 'partecipa'
+                        : 'nothingread')
+                ],
+                'matchCallback' => function ($rule, $action) {
+                    if ($action->id == 'all-discussions') return true;
+                    if ($action->id != 'partecipa') return false;
+                    $id = (!empty(\Yii::$app->request->get()['id']) ? Yii::$app->request->get()['id'] : null);
+                    if (!empty($id)) {
+                        $model = DiscussioniTopic::findOne($id);
+            
+                        if (!empty($model) && $model->primo_piano == 1) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            ];
+        }
         $behaviors = ArrayHelper::merge(
-                parent::behaviors(),
-                [
+            parent::behaviors(),
+            [
                 'access' => [
                     'class' => AccessControl::className(),
-                    'rules' => [
-                        [
-                            'allow' => true,
-                            'actions' => [
-                                'partecipa',
-                                'index',
-                                'all-discussions',
-                                'own-interest-discussions'
-                            ],
-                            'roles' => ['LETTORE_DISCUSSIONI', 'AMMINISTRATORE_DISCUSSIONI', 'CREATORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI',
-                                'VALIDATORE_DISCUSSIONI']
-                        ],
-                        [
-                            'allow' => true,
-                            'actions' => [
-                                'created-by',
-                            ],
-                            'roles' => ['CREATORE_DISCUSSIONI', 'AMMINISTRATORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI']
-                        ],
-                        [
-                            'allow' => true,
-                            'actions' => [
-                                'validate-discussion',
-                                'reject-discussion',
-                            ],
-                            'roles' => ['AMMINISTRATORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI', 'FACILITATOR', 'DiscussionValidateOnDomain',
-                                'VALIDATORE_DISCUSSIONI']
-                        ],
-                        [
-                            'allow' => true,
-                            'actions' => [
-                                'to-validate-discussions'
-                            ],
-                            'roles' => ['VALIDATORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI', 'AMMINISTRATORE_DISCUSSIONI',
-                                'DiscussionValidateOnDomain']
-                        ],
-                        [
-                            'allow' => true,
-                            'actions' => [
-                                'admin-all-discussions'
-                            ],
-                            'roles' => ['AMMINISTRATORE_DISCUSSIONI']
-                        ],
-                        [
-                            'allow' => true,
-                            'actions' => [
-                                ((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true) ? 'all-discussions'
-                                    : 'nothing'),
-                                ((!empty(\Yii::$app->params['befe']) && \Yii::$app->params['befe'] == true) ? 'partecipa'
-                                    : 'nothingread')
-                            ],
-                            'matchCallback' => function ($rule, $action) {
-                                if ($action->id == 'all-discussions') return true;
-                                if ($action->id != 'partecipa') return false;
-                                $id = (!empty(\Yii::$app->request->get()['id']) ? Yii::$app->request->get()['id'] : null);
-                                if (!empty($id)) {
-                                    $model = DiscussioniTopic::findOne($id);
-
-                                    if (!empty($model) && $model->primo_piano == 1) {
-                                        return true;
-                                    }
-                                }
-                                return false;
-                            }
-                        ],
-                    ]
+                    'rules' => $rules
                 ],
                 'verbs' => [
                     'class' => VerbFilter::className(),
@@ -131,9 +151,9 @@ class DiscussioniTopicController extends CrudController
                         'delete' => ['post', 'get']
                     ]
                 ]
-                ]
+            ]
         );
-
+        
         return $behaviors;
     }
 

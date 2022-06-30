@@ -36,9 +36,8 @@ use yii\widgets\ActiveForm as ActiveForm2;
  * @var ActiveForm2 $form
  */
 
-$form = ActiveForm::begin([
-    'options' => ['enctype' => 'multipart/form-data'] // important
-]);
+$moduleSeo = Yii::$app->getModule('seo');
+
 $customView = Yii::$app->getViewPath() . '/imageField.php';
 $utenteConnesso = Yii::$app->getUser();
 
@@ -46,6 +45,11 @@ $appController = Yii::$app->controller;
 $disableStandardWorkflow = $appController->discussioniModule->disableStandardWorkflow;
 
 $module = \Yii::$app->getModule('discussioni');
+$hideSeoModuleClass = $module->hideSeoModule ? ' hidden' : '';
+
+$form = ActiveForm::begin([
+    'options' => ['enctype' => 'multipart/form-data'] // important
+]);
 ?>
 
 <?php if (!$model->isNewRecord) : ?>
@@ -202,25 +206,6 @@ $module = \Yii::$app->getModule('discussioni');
             <span><?= AmosDiscussioni::t('amosdiscussioni', '#required_field') ?></span>
         </div>
 
-        <!-- <div class="col-md-12 col-sm-12 hidden">
-            < ?= $form->field($model, 'in_evidenza')->checkbox() ?>
-        </div> -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         <?php
         $isCommunityManager = false;
         if (\Yii::$app->getModule('community')) {
@@ -253,32 +238,30 @@ $module = \Yii::$app->getModule('discussioni');
     </div>
 
     <div class="row">
-        <?php
-        $moduleSeo = Yii::$app->getModule('seo');
-        if (isset($moduleSeo)) : ?>
-            <div class="col-xs-12">
-                <?= AccordionWidget::widget([
-                    'items' => [
-                        [
-                            'header' => AmosDiscussioni::t('amosdiscussioni', '#settings_seo_title'),
-                            'content' => SeoWidget::widget([
-                                'contentModel' => $model,
-                            ]),
-                        ]
-                    ],
-                    'headerOptions' => ['tag' => 'h2'],
-                    'options' =>  Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
-                    'clientOptions' => [
-                        'collapsible' => true,
-                        'active' => 'false',
-                        'icons' => [
-                            'header' => 'ui-icon-amos am am-plus-square',
-                            'activeHeader' => 'ui-icon-amos am am-minus-square',
-                        ]
-                    ],
-                ]);
-                ?>
-            </div>
+        <?php if (isset($moduleSeo)) : ?>
+        <div class="col-xs-12<?= $hideSeoModuleClass ?>">
+        <?= AccordionWidget::widget([
+            'items' => [
+                [
+                    'header' => AmosDiscussioni::t('amosdiscussioni', '#settings_seo_title'),
+                    'content' => SeoWidget::widget([
+                        'contentModel' => $model,
+                        ]),
+                    ]
+                ],
+                'headerOptions' => ['tag' => 'h2'],
+                'options' =>  Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
+                'clientOptions' => [
+                    'collapsible' => true,
+                    'active' => 'false',
+                    'icons' => [
+                        'header' => 'ui-icon-amos am am-plus-square',
+                        'activeHeader' => 'ui-icon-amos am am-minus-square',
+                    ]
+                ],
+            ]);
+            ?>
+        </div>
         <?php endif; ?>
 
         <?php
@@ -342,7 +325,7 @@ $module = \Yii::$app->getModule('discussioni');
         ]); ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
-
     <div class="clearfix"></div>
 </div>
+
+<?php ActiveForm::end(); ?>

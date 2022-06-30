@@ -256,6 +256,8 @@ return [
     'Visualizza Elenco Discussioni' => 'Visualizza Elenco Discussioni',
     'Visualizza' => 'Visualizza',
     'Visualizzazioni' => 'Visualizzazioni',
+    '#widget_graphic_cms_last_discussions_description' => 'Elenca le ultime discussioni create',
+    '#widget_graphic_cms_last_discussions_label' => 'Ultime discussioni',
     "#pubblication_on_portal" => "Modalità di pubblicazione sul portale",
     "#choose_publish_on_portal" => "Scegli se pubblicare la Notizia anche sul portale pubblico",
     'LEGGI' => 'LEGGI',

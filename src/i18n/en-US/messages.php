@@ -255,6 +255,8 @@ return [
     'Visualizza Elenco Discussioni' => 'Show the list of discussions',
     'Visualizza' => 'View',
     'Visualizzazioni' => 'Views',
+    '#widget_graphic_cms_last_discussions_description' => 'Show my recent discussions',
+    '#widget_graphic_cms_last_discussions_label' => 'Recent discussions',
     "#pubblication_on_portal" => "How to publish on the portal",
     "#choose_publish_on_portal" => "Choose whether to publish the Discussion also on the public portal",
     'LEGGI' => 'READ',

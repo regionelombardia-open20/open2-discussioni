@@ -26,6 +26,7 @@ use open20\amos\report\widgets\ReportFlagWidget;
 use open20\amos\seo\widgets\SeoWidget;
 use open20\amos\workflow\widgets\WorkflowTransitionButtonsWidget;
 use open20\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget;
+
 use yii\web\View;
 use yii\widgets\ActiveForm as ActiveForm2;
 
@@ -35,14 +36,16 @@ use yii\widgets\ActiveForm as ActiveForm2;
  * @var ActiveForm2 $form
  */
 
-?>
+$moduleSeo = Yii::$app->getModule('seo');
+$module = \Yii::$app->getModule('discussioni');
+$hideSeoModuleClass = $module->hideSeoModule ? ' hidden' : '';
 
-<?php
+$customView = Yii::$app->getViewPath() . '/imageField.php';
+$utenteConnesso = Yii::$app->getUser();
+
 $form = ActiveForm::begin([
     'options' => ['enctype' => 'multipart/form-data'] // important
 ]);
-$customView = Yii::$app->getViewPath() . '/imageField.php';
-$utenteConnesso = Yii::$app->getUser();
 ?>
 
 <?php if (!$model->isNewRecord) : ?>
@@ -57,7 +60,6 @@ $utenteConnesso = Yii::$app->getUser();
 <?php endif; ?>
 
 <div class="discussioni-form">
-
     <div class="row">
         <div class="col-xs-12">
             <?= Html::tag('h2', AmosDiscussioni::t('amosdiscussioni', '#settings_general_title') .
@@ -169,57 +171,38 @@ $utenteConnesso = Yii::$app->getUser();
     </div>
 
     <div class="row">
-        <?php
-        $moduleSeo = Yii::$app->getModule('seo');
-        if (isset($moduleSeo)) : ?>
-            <div class="col-xs-12">
-                <?= AccordionWidget::widget([
-                    'items' => [
-                        [
-                            'header' => AmosDiscussioni::t('amosdiscussioni', '#settings_seo_title'),
-                            'content' => SeoWidget::widget([
-                                'contentModel' => $model,
-                            ]),
-                        ]
-                    ],
-                    'headerOptions' => ['tag' => 'h2'],
-                    'options' =>  Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
-                    'clientOptions' => [
-                        'collapsible' => true,
-                        'active' => 'false',
-                        'icons' => [
-                            'header' => 'ui-icon-amos am am-plus-square',
-                            'activeHeader' => 'ui-icon-amos am am-minus-square',
-                        ]
-                    ],
-                ]);
-                ?>
-            </div>
+        <?php if (isset($moduleSeo)) : ?>
+        <div class="col-xs-12<?php $hideSeoModuleClass ?>">
+        <?= AccordionWidget::widget([
+            'items' => [
+                [
+                    'header' => AmosDiscussioni::t('amosdiscussioni', '#settings_seo_title'),
+                    'content' => SeoWidget::widget([
+                        'contentModel' => $model,
+                    ]),
+                ]
+            ],
+            'headerOptions' => ['tag' => 'h2'],
+            'options' =>  Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
+            'clientOptions' => [
+                'collapsible' => true,
+                'active' => 'false',
+                'icons' => [
+                    'header' => 'ui-icon-amos am am-plus-square',
+                    'activeHeader' => 'ui-icon-amos am am-minus-square',
+                ]
+            ],
+        ]);
+        ?>
+        </div>
         <?php endif; ?>
-
 
         <?php
         $config = [
             'model' => $model,
             'urlClose' => Yii::$app->session->get('previousUrl')
         ];
-        ?>
-
-        <?php
-
-        /*
-         *
-         * <?= \open20\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget::widget([
-            'form' => $form,
-            'model' => $model,
-            'workflowId' => DiscussioniTopic::DISCUSSIONI_WORKFLOW,
-            'classDivIcon' => '',
-            'classDivMessage' => 'message',
-            'viewWidgetOnNewRecord' => true
-        ]); ?>
-         *
-         */
-
+        
         $hideDraftStatuses = true;
 
         if (Yii::$app->user->can('DiscussionValidate', ['model' => $model])) {
@@ -274,7 +257,7 @@ $utenteConnesso = Yii::$app->getUser();
         ]); ?>
     </div>
 
-    <?php ActiveForm::end(); ?>
 
     <div class="clearfix"></div>
 </div>
+<?php ActiveForm::end(); ?>

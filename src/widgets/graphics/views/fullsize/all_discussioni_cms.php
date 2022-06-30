@@ -36,7 +36,7 @@ $userModule = CurrentUser::getUserProfile();
 $modelLabel = 'discussioni';
 
 $titleSection = AmosDiscussioni::t('amosdiscussioni', 'Discussioni');
-$urlLinkAll = AmosDiscussioni::t('amosdiscussioni', 'discussioni/discussioni-topic/all-discussions');
+$urlLinkAll = '/discussioni/discussioni-topic/all-discussions';
 $labelLinkAll = AmosDiscussioni::t('amosdiscussioni', 'Tutte le discussioni');
 $titleLinkAll = AmosDiscussioni::t('amosdiscussioni', 'Visualizza la lista delle discussioni');
 
@@ -44,8 +44,8 @@ $labelCreate = AmosDiscussioni::t('amosdiscussioni', 'Nuova');
 $titleCreate = AmosDiscussioni::t('amosdiscussioni', 'Crea una nuova discussione');
 $labelManage = AmosDiscussioni::t('amosdiscussioni', 'Gestisci');
 $titleManage = AmosDiscussioni::t('amosdiscussioni', 'Gestisci le discussioni');
-$urlCreate = AmosDiscussioni::t('amosdiscussioni', '/discussioni/discussioni-topic/create');
-$urlManage = AmosDiscussioni::t('amosdiscussioni', '#');
+$urlCreate = '/discussioni/discussioni-topic/create';
+$urlManage = '#';
 
 ?>
 
@@ -87,4 +87,3 @@ $urlManage = AmosDiscussioni::t('amosdiscussioni', '#');
     </div>
 
 <?php } ?>
-</div>

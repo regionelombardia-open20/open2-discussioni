@@ -145,20 +145,17 @@ $viewUrl = $model->getFullViewUrl();
 
                     <div class="third-column col-sm-4 col-xs-6 justify-content-between flexbox small">
 
-                        <div aria-label="<?= AmosDiscussioni::t('amosdiscussioni', 'Numero di risposte'); ?>" class="flexbox align-items-center" data-toggle="tooltip"
-                             title="<?= AmosDiscussioni::t('amosdiscussioni', 'Numero di risposte'); ?>">
+                        <div class="flexbox align-items-center" data-toggle="tooltip" title="<?= AmosDiscussioni::t('amosdiscussioni', 'Numero di risposte'); ?>">
                             <span class="am am-comment-outline"></span>
                             <?= $commentsNumberString ?>
                         </div>
 
-                        <div aria-label="<?= AmosDiscussioni::t('amosdiscussioni', 'Numero di visite'); ?>" class="flexbox align-items-center" data-toggle="tooltip"
-                             title="<?= AmosDiscussioni::t('amosdiscussioni', 'Numero di visite'); ?>">
+                        <div class="flexbox align-items-center" data-toggle="tooltip" title="<?= AmosDiscussioni::t('amosdiscussioni', 'Numero di visite'); ?>">
                             <span class="am am-eye"></span>
                             <?= $numeroVisualizzazioni ?>
                         </div>
 
-                        <div aria-label="<?= AmosDiscussioni::t('amosdiscussioni', 'Ultima attività'); ?>" class="flexbox align-items-center" data-toggle="tooltip"
-                             title="<?= AmosDiscussioni::t('amosdiscussioni', 'Ultima attività'); ?>">
+                        <div class="flexbox align-items-center" data-toggle="tooltip" title="<?= AmosDiscussioni::t('amosdiscussioni', 'Ultima attività'); ?>">
                             <span class="am am-time"></span>
                             <?php
                             // /** @var DiscussioniTopic $model */
