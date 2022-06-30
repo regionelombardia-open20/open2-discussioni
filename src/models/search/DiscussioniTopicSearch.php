@@ -210,7 +210,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
                 break;
             case 'all':
                 if ($isSetCwh) {
-                    $query = $cwhActiveQuery->getQueryCwhAll();
+                    $query = $cwhActiveQuery->getQueryCwhAll(null,null,true);
                 } else {
                     $query->andWhere([
                         'status' => DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA

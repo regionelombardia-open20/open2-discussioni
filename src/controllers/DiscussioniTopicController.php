@@ -742,12 +742,13 @@ class DiscussioniTopicController extends CrudController
 
         /** @var DiscussioniTopic $model */
         $model = $this->findModel($id);
-        $model->detachBehavior('seoBehavior');
-        $model->detachBehavior('SeoContentBehavior');
-        $model->detachBehavior('TimestampBehavior');
-        $model->detachBehavior('BlameableBehavior');
-        $model->hints++;
-        $model->save(false);
+       
+        $count = ($model->hints + 1);
+        try{
+            \Yii::$app->db->createCommand("UPDATE discussioni_topic SET hints = $count WHERE id = $id")->execute();            
+        } catch (\yii\db\Exception $ex) {
+
+        }
 
         // TODO: possibile bug perché la find non ha parametri quindi qui sta cercando tutto.
         $listaAllegati = $model->getdiscussionsAttachments();
