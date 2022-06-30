@@ -73,8 +73,9 @@ $this->params['breadcrumbs'][] = ['label' => $this->title];
             if ($thisDashboardWidgets && count($thisDashboardWidgets) > 0) {
 
                 foreach ($thisDashboardWidgets as $widget) {
-                    $widgetObj = Yii::createObject($widget['classname']);
-                    echo $widgetObj::widget();
+//                    $widgetObj = Yii::createObject($widget['classname']);
+//                    echo $widgetObj::widget();
+                    echo $widget['classname']::widget();
                 }
             } else {
                 AmosDashboard::t('amosdashboard', 'Non ci sono widgets selezionati per questa dashboard');

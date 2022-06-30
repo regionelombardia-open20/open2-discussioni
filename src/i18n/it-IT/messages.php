@@ -253,7 +253,7 @@ return [
     'Visualizza' => 'Visualizza',
     'Visualizzazioni' => 'Visualizzazioni',
     "#pubblication_on_portal" => "Modalità di pubblicazione sul portale",
-    "#choose_publish_on_portal" => "Scegli se pubblicare la Notizia anche sul portale pubblico",
+    "#choose_publish_on_portal" => "Scegli se pubblicare la Discussione anche sul portale pubblico",
     'LEGGI' => 'LEGGI',
     '#by' => 'di',
     '#showAll' => 'Visualizza tutto',

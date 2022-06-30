@@ -26,7 +26,6 @@ class m160912_145059_add_discussioni_permission extends AmosMigration
 
     /**
      * Use this instead of function up().
-     * @see \Yii\db\Migration::safeUp() for more info.
      */
     public function safeUp()
     {        
@@ -35,7 +34,6 @@ class m160912_145059_add_discussioni_permission extends AmosMigration
 
     /**
      * Use this instead of function down().
-     * @see \Yii\db\Migration::safeDown() for more info.
      */
     public function safeDown()
     {

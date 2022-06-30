@@ -56,7 +56,6 @@ class m160912_145023_alter_workflow_tables_discussioni extends Migration
     
     /**
      * Use this instead of function down().
-     * @see \Yii\db\Migration::safeDown() for more info.
      */
     public function safeDown()
     {

@@ -48,18 +48,18 @@ $disableStandardWorkflow = $appController->discussioniModule->disableStandardWor
 $module = \Yii::$app->getModule('discussioni');
 $moduleNotify = \Yii::$app->getModule('notify');
 
-?>
-
-<?php if (!$model->isNewRecord) : ?>
-    <?= WorkflowTransitionStateDescriptorWidget::widget([
+if (!$model->isNewRecord) {
+    echo WorkflowTransitionStateDescriptorWidget::widget([
         'form' => $form,
         'model' => $model,
         'workflowId' => DiscussioniTopic::DISCUSSIONI_WORKFLOW,
         'classDivIcon' => '',
         'classDivMessage' => 'message',
         'viewWidgetOnNewRecord' => false
-    ]); ?>
-<?php endif; ?>
+    ]);
+}
+
+?>
 
 <div class="discussioni-form col-xs-12">
     <div class="row">
@@ -144,37 +144,74 @@ $moduleNotify = \Yii::$app->getModule('notify');
                 </div>
             <?php endif; ?>
 
-            <?php
-            if (AmosDiscussioni::instance()->enable_foreground && Yii::$app->user->can(AmosDiscussioni::instance()->foreground_permission)) : ?>
-                <div class="col-xs-12 receiver-section">
-                    <div class="row">
-                        <h3 class="subtitle-section-form"><?= AmosNews::t('amosdiscussioni', "#pubblication_on_portal") ?>
-                            <em>(<?= AmosNews::t('amosdiscussioni', "#choose_publish_on_portal") ?>)</em>
-                        </h3>
+            <?php 
+            $publish_enabled = \Yii::$app->user->can('DISCUSSIONI_PUBLISHER_FRONTEND')
+                && !empty(AmosDiscussioni::instance()->publication_always_enabled);
 
-                        <div class="col-md-4 col-xs-12">
-                            <?= $form->field($model, 'primo_piano')->widget(Select::className(),
-                                [
-                                    'auto_fill' => true,
-                                    'data' => Html::getBooleanFieldsValues(),
-                                    'options' => [
-                                        'prompt' => AmosNews::t('amosdiscussioni', 'Seleziona'),
-                                        'disabled' => false,
-                                    ],
-                                ]);
-                            ?>
+            $publish_enabled = $publish_enabled
+                ? $publish_enabled
+                : $publish_enabled && empty($scope) && !$pubblicatedForCommunity;
+
+            if (($publish_enabled) && (
+                (
+                    AmosDiscussioni::instance()->enable_foreground 
+                    && Yii::$app->user->can(AmosDiscussioni::instance()->foreground_permission
+                )
+                || AmosDiscussioni::instance()->site_publish_enabled
+                || AmosDiscussioni::instance()->site_featured_enabled
+                )
+            ))
+            : ?>
+            <div class="col-xs-12 receiver-section">
+                <div class="row">
+                    <h3 class="subtitle-section-form"><?= AmosNews::t('amosdiscussioni', "#pubblication_on_portal") ?>
+                        <em>(<?= AmosDiscussioni::t('amosdiscussioni', "#choose_publish_on_portal") ?>)</em>
+                    </h3>
+
+                    <div class="col-md-6 col-xs-12">
+                        <?= $form->field($model, 'primo_piano')->widget(Select::className(), [
+                            'auto_fill' => true,
+                            'data' => Html::getBooleanFieldsValues(),
+                            'options' => [
+                                'prompt' => AmosDiscussioni::t('amosdiscussioni', 'Seleziona'),
+                                'disabled' => false,
+                                'onchange' => "
+                                    if($(this).val() == 1) $('#discussionitopic-in_evidenza').prop('disabled', false);
+                                    if($(this).val() == 0) {
+                                        $('#discussionitopic-in_evidenza').prop('disabled', true);
+                                        $('#discussionitopic-in_evidenza').val(0);
+                                    }"
+                            ],
+                        ]); ?>
+                    </div>
+                    
+                    <?php if (AmosDiscussioni::instance()->site_publish_enabled ) : ?>
+                        <div class="col-md-6 col-xs-12">
+                        <?php //= $form->field($model, 'in_evidenza')->checkbox() ?>
+                        <?= $form->field($model, 'in_evidenza')->widget(Select::className(), [
+                            'auto_fill' => true,
+                            'data' => Html::getBooleanFieldsValues(),
+                            'options' => [
+                                'prompt' => AmosDiscussioni::t('amosnews', 'Seleziona'),
+                                'disabled' => ($model->primo_piano == 1 ? false : true)
+                            ]
+                        ]);
+                        ?>
                         </div>
                     </div>
+                <?php endif; ?>
+
                 </div>
-            <?php endif; ?>
-        </div>
+                <?php endif; ?>
 
-        <div class="col-xs-12 note_asterisk">
-            <span><?= AmosDiscussioni::t('amosdiscussioni', '#required_field') ?></span>
-        </div>
-
-        <div class="col-md-12 col-sm-12 hidden">
-            <?= $form->field($model, 'in_evidenza')->checkbox() ?>
+                <?php 
+                if (\Yii::$app->getModule('correlations')) {
+                    echo open2\amos\correlations\widget\ManageCorrelationsButtonWidget::widget([
+                        'model' => $model
+                    ]);
+                }
+                ?>
+            </div>
         </div>
 
         <?php
@@ -318,6 +355,7 @@ $moduleNotify = \Yii::$app->getModule('notify');
 
             'draftButtons' => $draftButtons
         ]); ?>
+
     </div>
 
     <?php ActiveForm::end(); ?>

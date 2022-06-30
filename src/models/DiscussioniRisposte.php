@@ -23,7 +23,6 @@ use yii\db\BaseActiveRecord;
 class DiscussioniRisposte extends DiscussioniRisposteBase
 {
     /**
-     * @see BaseActiveRecord::afterSave()
      *
      * @param bool $insert
      * @param array $changedAttributes

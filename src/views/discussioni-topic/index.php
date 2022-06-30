@@ -154,7 +154,7 @@ $columns [] = [
             
             if (Yii::$app->getUser()->can('DiscussionValidate', ['model' => $model])) {
                 return ModalUtility::addConfirmRejectWithModal([
-                    'modalId' => 'validate-discussion-topic-modal-id-' . $model->id,
+                    'modalId' => 'validate-discussion-topic-modal-' . $model->id,
                     'modalDescriptionText' => AmosDiscussioni::t('amosdiscussioni', '#VALIDATE_DISCUSSION_MODAL_TEXT'),
                     'btnText' => AmosIcons::show('check-circle', ['class' => '']),
                     'btnLink' => Yii::$app->urlManager->createUrl([
@@ -169,7 +169,7 @@ $columns [] = [
             /** @var DiscussioniTopic $model */
             if (Yii::$app->getUser()->can('DiscussionValidate', ['model' => $model])) {
                 return ModalUtility::addConfirmRejectWithModal([
-                    'modalId' => 'reject-discussion-topic-modal-id-' . $model->id,
+                    'modalId' => 'reject-discussion-topic-modal-' . $model->id,
                     'modalDescriptionText' => AmosDiscussioni::t('amosdiscussioni', '#REJECT_DISCUSSION_MODAL_TEXT'),
                     'btnText' => AmosIcons::show('minus-circle', ['class' => '']),
                     'btnLink' => Yii::$app->urlManager->createUrl([

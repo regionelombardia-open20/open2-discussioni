@@ -23,7 +23,6 @@ use yii\db\BaseActiveRecord;
 class DiscussioniCommenti extends DiscussioniCommentiBase
 {
     /**
-     * @see BaseActiveRecord::afterSave()
      *
      * @param bool $insert
      * @param array $changedAttributes

@@ -136,7 +136,6 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
     }
 
     /**
-     * @see \yii\base\Model::rules() for more info.
      */
     public function rules()
     {
@@ -787,6 +786,14 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
      */
     public function setCloseCommentThread($closeCommentThread) {
         $this->close_comment_thread = $closeCommentThread;
+    }
+
+    /**
+     * Testo del bottone delle notifiche
+     * @return type
+     */
+    public function getNotifyTextButton(){
+        return AmosDiscussioni::t('amosdiscussioni', 'Rispondi');
     }
 
 }

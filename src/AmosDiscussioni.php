@@ -34,6 +34,17 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
      * @var bool $disableComments disable comments
      */
     public $disableComments = false;
+
+    /**
+     * @var array
+     */
+    public $viewPathEmailSummary = [
+        'open20\amos\discussioni\models\DiscussioniTopic' => '@vendor/open20/amos-discussioni/src/views/email/notify_summary'
+    ];
+
+    public $viewPathEmailSummaryNetwork = [
+        'open20\amos\discussioni\models\DiscussioniTopic' => '@vendor/open20/amos-discussioni/src/views/email/notify_summary_network'
+    ];
     
     const
         MAX_LAST_DISCUSSION_ON_DASHBOARD = 3;
@@ -63,6 +74,19 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
      */
     public $disableStandardWorkflow = false;
 
+   /**
+    * @var bool values ad the same meaning of news module
+    */ 
+    public 
+       $site_featured_enabled = false;
+   
+    public 
+        $site_publish_enabled = false;
+    
+    public
+        $publication_always_enabled = false;
+   
+   
     /**
      * @param \yii\base\Application $app
      */

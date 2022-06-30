@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -14,11 +13,9 @@ namespace open20\amos\discussioni\widgets\icons;
 use open20\amos\core\widget\WidgetIcon;
 use open20\amos\core\widget\WidgetAbstract;
 use open20\amos\core\icons\AmosIcons;
-
 use open20\amos\discussioni\AmosDiscussioni;
 use open20\amos\discussioni\models\DiscussioniTopic;
 use open20\amos\discussioni\models\search\DiscussioniTopicSearch;
-
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\Application as Web;
@@ -63,22 +60,9 @@ class WidgetIconDiscussioniTopicAdminAll extends WidgetIcon
 
         $this->setClassSpan(
             ArrayHelper::merge(
-                $this->getClassSpan(),
-                $paramsClassSpan
+                $this->getClassSpan(), $paramsClassSpan
             )
         );
-
-        if (Yii::$app instanceof Web) {
-            $search = new DiscussioniTopicSearch();
-
-            $this->setBulletCount(
-                $this->makeBulletCounter(
-                    Yii::$app->getUser()->getId(),
-                    DiscussioniTopic::className(),
-                    $search->buildQuery('admin-all', [])
-                )
-            );
-        }
     }
 
     /**
@@ -88,8 +72,7 @@ class WidgetIconDiscussioniTopicAdminAll extends WidgetIcon
     public function getOptions()
     {
         return ArrayHelper::merge(
-            parent::getOptions(),
-            ['children' => $this->getWidgetsIcon()]
+                parent::getOptions(), ['children' => $this->getWidgetsIcon()]
         );
     }
 
@@ -107,5 +90,4 @@ class WidgetIconDiscussioniTopicAdminAll extends WidgetIcon
 
         return $widgets;
     }
-
 }

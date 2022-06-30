@@ -68,17 +68,6 @@ class WidgetIconDiscussioniTopicDaValidare extends WidgetIcon
             )
         );
 
-        if (Yii::$app instanceof Web) {
-            $search = new DiscussioniTopicSearch();
-
-            $this->setBulletCount(
-                $this->makeBulletCounter(
-                    Yii::$app->getUser()->getId(),
-                    DiscussioniTopic::className(),
-                    $search->buildQuery('to-validate', [])
-                )
-            );
-        }
     }
 
     /**

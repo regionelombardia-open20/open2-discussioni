@@ -120,7 +120,16 @@ $module = \Yii::$app->getModule('discussioni');
         </div>
         <?php endif; ?>
         
+        <?php
+        if (\Yii::$app->getModule('correlations')) {
+            echo open2\amos\correlations\widget\ListCorrelationsWidget::widget([
+                'model' => $model
+            ]);
+        }
+        ?>
+        <div class="clearfix"></div>
     </div>
+
     <div class="col-md-4 col-xs-12 nop">
         <div class="col-xs-12 attachment-section-sidebar nop" id="section-attachments">
             <?= Html::tag('h2', AmosIcons::show('paperclip', [], 'dash') . AmosDiscussioni::t('amosdiscussioni', '#attachments_title')) ?>

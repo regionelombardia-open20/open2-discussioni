@@ -60,14 +60,20 @@ class DiscussioniTopicController extends CrudController {
                     'rules' => [
                         [
                             'allow' => true,
-                            'actions' => [
-                                'partecipa',
+                            'actions' => [                               
                                 'index',
                                 'all-discussions',
                                 'own-interest-discussions'
                             ],
                             'roles' => ['LETTORE_DISCUSSIONI', 'AMMINISTRATORE_DISCUSSIONI', 'CREATORE_DISCUSSIONI', 'FACILITATORE_DISCUSSIONI',
                                 'VALIDATORE_DISCUSSIONI']
+                        ],
+                        [
+                            'allow' => true,
+                            'actions' => [
+                                'partecipa',
+                            ],
+                            'roles' => ['DISCUSSIONITOPIC_READ']
                         ],
                         [
                             'allow' => true,
@@ -187,7 +193,7 @@ class DiscussioniTopicController extends CrudController {
         Url::remember();
 
         $this->setDataProvider($this->getModelSearch()->searchAll(Yii::$app->request->getQueryParams()));
-
+        
         $this->setListViewsParams();
         $this->setTitleAndBreadcrumbs(AmosDiscussioni::t('amosdiscussioni', 'Tutte le discussioni'));
 

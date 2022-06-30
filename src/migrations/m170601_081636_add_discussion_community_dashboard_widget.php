@@ -1,14 +1,5 @@
 <?php
 
-/**
- * Aria S.p.A.
- * OPEN 2.0
- *
- *
- * @package    Open20Package
- * @category   CategoryName
- */
-
 use open20\amos\dashboard\models\AmosWidgets;
 
 class m170601_081636_add_discussion_community_dashboard_widget extends \open20\amos\core\migration\AmosMigrationWidgets
