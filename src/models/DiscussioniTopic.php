@@ -870,4 +870,5 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
         return false;
     }
 
+
 }

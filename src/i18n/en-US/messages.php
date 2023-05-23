@@ -10,6 +10,7 @@
  */
 
 return [
+    '#you_are_not_authorized_for_this' => 'You are not authorized to perform this operation',
     '#addDiscussions' => 'Add  discussion',
     'Add new discussion' => 'Add new discussion',
     'Aggiorna {modelClass}' => 'Update {modelClass}',

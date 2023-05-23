@@ -21,14 +21,16 @@ use open20\amos\discussioni\widgets\graphics\WidgetGraphicsUltimeDiscussioni;
 use open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopic;
 use open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicCreatedBy;
 use open20\amos\discussioni\widgets\icons\WidgetIconDiscussioniTopicDaValidare;
+use yii\base\BootstrapInterface;
 use yii\console\Application;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * Class AmosDiscussioni
  * @package open20\amos\discussioni
  */
-class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModuleInterface, CmsModuleInterface, BreadcrumbInterface
+class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModuleInterface, CmsModuleInterface, BreadcrumbInterface, BootstrapInterface
 {
     /**
      * @var bool $disableComments disable comments
@@ -135,9 +137,15 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     public function bootstrap($app)
     {
         if ($app instanceof Application) {
-            $this->controllerNamespace = 'open20\amos\discussioni\commands\controllers';
-            \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/commands/controllers', __DIR__ . '/commands/controllers');
-            \Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'commands' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
+            //MZ: commentato perchè mai eseguito non esisteva l'implementazione dell'interffaccia di bootstrap!
+            // se dovesse servire va testato con il contesto giusto - ora in console quesa roba non funziona!
+//            $this->controllerNamespace = 'open20\amos\discussioni\commands\controllers';
+//            \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/commands/controllers', __DIR__ . '/commands/controllers');
+//            \Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'commands' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
+        } else {
+            $app->getUrlManager()->addRules([
+                'discussioni/discussioni-topic/partecipa/<id:\d+>/<title:.*?>' => 'discussioni/discussioni-topic/partecipa',
+            ], false);
         }
     }
     

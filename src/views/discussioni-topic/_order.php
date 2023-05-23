@@ -36,7 +36,11 @@ $currentView = Yii::$app->request->getQueryParam('currentView');
     echo Html::hiddenInput("currentView", $currentView); ?>
     
     <div class="col-sm-6 col-lg-4">
-        <?= $form->field($model, 'orderAttribute')->dropDownList($model->getOrderAttributesLabels()) ?>
+        <?php $orderLabels = $model->getOrderAttributesLabels();
+        foreach ($orderLabels as $value => $label){
+            $orderLabels[$value] = AmosDiscussioni::t('amosdiscussioni', $label);
+        }?>
+        <?= $form->field($model, 'orderAttribute')->dropDownList($orderLabels) ?>
     </div>
     
     <div class="col-sm-6 col-lg-4">

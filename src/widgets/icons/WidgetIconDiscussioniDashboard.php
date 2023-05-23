@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Aria S.p.A.
  * OPEN 2.0
@@ -21,6 +20,7 @@ use Yii;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 use yii\web\Application as Web;
+use open20\amos\core\record\Record;
 
 /**
  * Class WidgetIconDiscussioni
@@ -34,7 +34,6 @@ class WidgetIconDiscussioniDashboard extends WidgetIcon
     /*
      * to avoid multiple calling
      */
-    
     protected static $_called = false;
 
     /**
@@ -67,17 +66,14 @@ class WidgetIconDiscussioniDashboard extends WidgetIcon
 
         $this->setClassSpan(
             ArrayHelper::merge(
-                $this->getClassSpan(),
-                $paramsClassSpan
+                $this->getClassSpan(), $paramsClassSpan
             )
         );
 
-        if (self::$_called === false) {
-            self::$_called = true;
-            if (Yii::$app instanceof Web) {
-                $this->setBulletCount(
-                    $this->makeBulletCounter(Yii::$app->getUser()->getId())
-                );
+        if (Yii::$app instanceof Web) {
+            if ($this->disableBulletCounters == false) {
+                $this->setBulletCount(Record::getStaticBullet(Record::BULLET_TYPE_ALL, false, 'discussioni_topic',
+                        false, true));
             }
         }
     }
@@ -97,7 +93,6 @@ class WidgetIconDiscussioniDashboard extends WidgetIcon
 
 //        return $this->getBulletCountChildWidgets($userId);
     }
-
 //    /**
 //     * 
 //     * @param type $userId
@@ -135,8 +130,7 @@ class WidgetIconDiscussioniDashboard extends WidgetIcon
     public function getOptions()
     {
         return ArrayHelper::merge(
-                parent::getOptions(),
-                ['children' => $this->getWidgetsIcon()]
+                parent::getOptions(), ['children' => $this->getWidgetsIcon()]
         );
     }
 
@@ -159,5 +153,4 @@ class WidgetIconDiscussioniDashboard extends WidgetIcon
 
         return $widgets;
     }
-
 }

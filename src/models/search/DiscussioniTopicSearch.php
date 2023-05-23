@@ -80,7 +80,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         if (isset($moduleTag) && in_array($this->modelClassName, $moduleTag->modelsEnabled) && $moduleTag->behaviors) {
             $behaviors = ArrayHelper::merge($moduleTag->behaviors, $behaviors);
         }
-       
+
         return ArrayHelper::merge($parentBehaviors, $behaviors);
     }
 
@@ -112,7 +112,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         //Switch off notification service for not readed discussion notifications
         $notify = $this->getNotifier();
         if ($notify) {
-            /** @var \open20\amos\notificationmanager\AmosNotify 
+            /** @var \open20\amos\notificationmanager\AmosNotify
               $notify */
             $this->getNotifier();
             $notify->notificationOff(Yii::$app->getUser()->id, $this->modelClassName, $query,
@@ -475,7 +475,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
     }
 
     /**
-     * 
+     *
      * @param type $params
      * @param type $limit
      * @return type
@@ -484,16 +484,16 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
     {
 
         $querycwhpubb = "
-			SELECT 
+			SELECT
 				`content_id`
 			FROM `cwh_pubblicazioni` cp
-                        JOIN `cwh_config_contents` ccc 
+                        JOIN `cwh_config_contents` ccc
                         ON cp.`cwh_config_contents_id` = ccc.`id`
 			AND ccc.`tablename` = '".DiscussioniTopic::tableName()."'
                         WHERE cp.`id` in (
-                            SELECT a.`cwh_pubblicazioni_id` 
-                            FROM `cwh_pubblicazioni_cwh_nodi_editori_mm` a 
-                            JOIN `cwh_config` b 
+                            SELECT a.`cwh_pubblicazioni_id`
+                            FROM `cwh_pubblicazioni_cwh_nodi_editori_mm` a
+                            JOIN `cwh_config` b
                             on a.`cwh_config_id` = b.`id` and b.`tablename` = '".Community::tableName()."'
                             where a.`cwh_network_id` in (2604,1425,2602,2608))
         ";
@@ -544,7 +544,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
     }
 
     /**
-     * 
+     *
      * @param type $id
      * @return boolean
      */
@@ -618,6 +618,8 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         ]);
         if (\Yii::$app->user->isGuest) {
             $query->andWhere($tableName.'.primo_piano = 1');
+        }else{
+            $query = $this->searchAllQuery($params);
         }
 
         return $query;

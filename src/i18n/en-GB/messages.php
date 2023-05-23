@@ -10,6 +10,7 @@
  */
 
 return [
+    '#you_are_not_authorized_for_this' => 'You are not authorized to perform this operation',
     '#addDiscussions' => 'Add  discussion',
     'Add new discussion' => 'Add new discussion',
     'Aggiorna {modelClass}' => 'Update {modelClass}',
@@ -275,5 +276,7 @@ return [
     'Non ci sono discussioni di tuo interesse!' => 'There are no discussions of your interest!',
     'Clicca e scopri tutte le discussioni della piattaforma' => 'Click and discover all threads of the platform',
     'e scopri ora tutte le discussioni di' => 'and discover now all threads of',
-    'Non sono presenti discussioni' => 'There are no discussions'
+    'Non sono presenti discussioni' => 'There are no discussions',
+    'Discussioni Topic Titolo' => "Title",
+    'Discussioni Topic Created At' => "Created at",
 ];
