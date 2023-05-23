@@ -54,7 +54,6 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
      * @var bool $geolocalEnabled
      */
     public $geolocalEnabled = false;
-    
     /**
      * @var string $geolocalLatColumn
      */

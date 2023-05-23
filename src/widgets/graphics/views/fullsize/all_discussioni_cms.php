@@ -67,6 +67,7 @@ $urlManage = '#';
                 'titleManage' => $titleManage,
                 'urlCreate' => $urlCreate,
                 'urlManage' => $urlManage,
+               // 'canCreateCommunityWidget' => AmosDiscussioni::instance()->canCreateCommunityWidget,
             ]
         );
         ?>

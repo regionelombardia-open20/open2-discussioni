@@ -116,7 +116,8 @@ $form = ActiveForm::begin([
                     ],
                     'pluginOptions' => [ // Plugin options of the Kartik's FileInput widget
                         'maxFileCount' => 100, // Client max files,
-                        'showPreview' => false
+                        'showPreview' => false,
+                        'allowedFileExtensions' => ['csv', 'doc', 'docx', 'pdf', 'rtf', 'txt', 'xls', 'xlsx', 'png', 'jpg', 'gif', 'bmp', 'jpeg', 'ppt', 'pptx']
                     ]
                 ])->label(AmosDiscussioni::t('amosdiscussioni', '#attachments_field'))->hint(AmosDiscussioni::t('amosdiscussioni', '#attachments_field_hint')) ?>
                 <?= AttachmentsList::widget([

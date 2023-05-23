@@ -77,6 +77,7 @@ if (isset($moduleCwh) && !empty($moduleCwh->getCwhScope())) {
                 'titleManage' => $titleManage,
                 'urlCreate' => $urlCreate,
                 'manageLinks' => $manageLinks,
+                'canCreateCommunityWidget' => \Yii::$app->user->can('DISCUSSIONITOPIC_CREATE'),
             ]
         );
         ?>

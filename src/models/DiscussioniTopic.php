@@ -156,7 +156,7 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
         return ArrayHelper::merge(parent::rules(),
                 [
                 [['discussionsTopicImage'], 'file', 'extensions' => 'jpeg, jpg, png, gif', 'maxFiles' => 1],
-                [['discussionsAttachments'], 'file', 'maxFiles' => 0],
+                [['discussionsAttachments'], 'file', 'extensions' => 'csv, doc, docx, pdf, rtf, txt, xls, xlsx, png, jpg, gif, bmp, jpeg, ppt, pptx', 'maxFiles' => 0],
         ]);
     }
 
