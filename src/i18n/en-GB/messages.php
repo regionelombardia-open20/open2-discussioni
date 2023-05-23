@@ -279,4 +279,6 @@ return [
     'Non sono presenti discussioni' => 'There are no discussions',
     'Discussioni Topic Titolo' => "Title",
     'Discussioni Topic Created At' => "Created at",
+    "Vuoi rendere visibile la discussione anche ad utenti non registrati (guest)" => "Do you want to show the discussion to all users (not registered included) ?",
+
 ];

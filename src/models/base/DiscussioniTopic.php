@@ -78,7 +78,7 @@ abstract class DiscussioniTopic extends \open20\amos\core\record\ContentModel
             'lat' => AmosDiscussioni::t('amosdiscussioni', 'Latitudine'),
             'lng' => AmosDiscussioni::t('amosdiscussioni', 'Longitudine'),
             'in_evidenza' => AmosDiscussioni::t('amosdiscussioni', 'In evidenza'),
-            'primo_piano' => AmosDiscussioni::t('amosdiscussioni', 'Pubblica sul sito'),
+            'primo_piano' => AmosDiscussioni::t('amosdiscussioni', 'Vuoi rendere visibile la discussione anche ad utenti non registrati (guest)?'),
             'status' => AmosDiscussioni::t('amosdiscussioni', 'Stato'),
             'image_id' => AmosDiscussioni::t('amosdiscussioni', 'Immagine'),
             'created_at' => AmosDiscussioni::t('amosdiscussioni', 'Creato il'),

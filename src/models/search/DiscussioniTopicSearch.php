@@ -17,7 +17,9 @@ use open20\amos\core\interfaces\CmsModelInterface;
 use open20\amos\core\module\AmosModule;
 use open20\amos\core\record\SearchResult;
 use open20\amos\core\record\CmsField;
+use open20\amos\cwh\models\CwhConfig;
 use open20\amos\discussioni\models\DiscussioniTopic;
+use open20\amos\news\models\News;
 use open20\amos\notificationmanager\base\NotifyWidget;
 use open20\amos\notificationmanager\models\NotificationChannels;
 use Yii;
@@ -287,7 +289,12 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
      */
     public function searchAll($params, $limit = null)
     {
-        return $this->search($params, 'all', $limit);
+        $dataProvider = $this->search($params, 'all', $limit);
+        if (Yii::$app->user->isGuest) {
+            $dataProvider->query->andWhere(['primo_piano' => true]);
+        }
+
+        return $dataProvider;
     }
 
     /**
@@ -463,6 +470,7 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         $query        = $this->homepageDiscussioniQuery($params);
         $this->applySearchFilters($query);
         $query->limit($limit);
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => [
@@ -473,6 +481,82 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         ]);
         return $dataProvider;
     }
+
+    /**
+     * @param $params
+     * @param $limit
+     * @return ActiveDataProvider
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function cmsSearchCommunity($params, $limit = null){
+        $this->load($params);
+        $query        = $this->homepageDiscussioniCommunityQuery($params);
+        $this->applySearchFilters($query);
+        $query->limit($limit);
+
+        if (!empty($params["conditionSearch"])) {
+            $commands = explode(";", $params["conditionSearch"]);
+            foreach ($commands as $command) {
+                if (strpos($command, 'scope_community_id')) {
+                    $communityId = $this->extractCommunityIdFromCommand($command);
+                    $query = $this->cmsFilterScopeCommunity($query, $communityId);
+                } else {
+                    $query->andWhere(eval("return " . $command . ";"));
+                }
+            }
+        }
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'created_at' => SORT_DESC,
+                ],
+            ],
+        ]);
+        return $dataProvider;
+    }
+
+
+
+    /**
+     * @param $command
+     * @return string|null
+     */
+    public function extractCommunityIdFromCommand($command)
+    {
+        $community_id = null;
+        $explode = explode('=>', $command);
+        if (count($explode) == 2) {
+            $community_id = trim($explode[1]);
+        }
+        return $community_id;
+    }
+
+    /**
+     * @param $query
+     * @param $community_id
+     * @return mixed|\yii\db\ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function cmsFilterScopeCommunity($query, $community_id)
+    {
+        if ($community_id) {
+            $cwhConfig = CwhConfig::find()->andWhere(['tablename' => 'community'])->one();
+            if ($cwhConfig) {
+                $cwhActiveQuery = new \open20\amos\cwh\query\CwhActiveQuery(
+                    DiscussioniTopic::className(),
+                    [
+                        'queryBase' => $query,
+                        'bypassScope' => false
+                    ]
+                );
+                $query = $cwhActiveQuery->getQueryCwhAll($cwhConfig->id, $community_id, false);
+            }
+        }
+        return $query;
+    }
+
+
 
     /**
      *
@@ -621,6 +705,22 @@ class DiscussioniTopicSearch extends DiscussioniTopic implements SearchModelInte
         }else{
             $query = $this->searchAllQuery($params);
         }
+
+        return $query;
+    }
+
+    /**
+     * @param $params
+     * @return ActiveQuery
+     */
+    public function homepageDiscussioniCommunityQuery($params)
+    {
+        $tableName = $this->tableName();
+        $query     = $this->baseSearch($params)
+            ->andWhere([
+                $tableName.'.status' => DiscussioniTopic::DISCUSSIONI_WORKFLOW_STATUS_ATTIVA,
+            ]);
+        $query->andWhere($tableName.'.primo_piano = 1');
 
         return $query;
     }

@@ -168,15 +168,13 @@ $form = ActiveForm::begin([
                             <em>(<?= AmosNews::t('amosdiscussioni', "#choose_publish_on_portal") ?>)</em>
                         </h3>
                         <div class="col-md-6">
-                            <?= $form->field($model, 'primo_piano')->widget(
-                                Select::className(),
+                            <?php if ($model->isNewRecord) {
+                                $model->primo_piano = false;
+                            } ?>
+                            <?= $form->field($model, 'primo_piano')->widget(Select::className(),
                                 [
-                                    'auto_fill' => true,
                                     'data' => Html::getBooleanFieldsValues(),
-                                    'options' => [
-                                        'prompt' => AmosNews::t('amosdiscussioni', 'Seleziona'),
-                                        'disabled' => false,
-                                    ],
+                                    'hideSearch' => true
                                 ]
                             );
                             ?>
