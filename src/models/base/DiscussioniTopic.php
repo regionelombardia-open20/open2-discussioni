@@ -11,6 +11,7 @@
 
 namespace open20\amos\discussioni\models\base;
 
+use open20\amos\core\validators\StringHtmlValidator;
 use open20\amos\discussioni\AmosDiscussioni;
 use open20\amos\notificationmanager\record\NotifyRecord;
 use yii\helpers\ArrayHelper;
@@ -58,6 +59,7 @@ abstract class DiscussioniTopic extends \open20\amos\core\record\ContentModel
     {
         return [
             [['testo'], 'string'],
+            [['testo'], StringHtmlValidator::className()],
             [['titolo', 'status'], 'required'],
             [['primo_piano','in_evidenza', 'hints', 'created_by', 'updated_by', 'deleted_by', 'version', 'image_id'], 'integer'],
             [['slug', 'close_comment_thread', 'created_at', 'updated_at', 'deleted_at', 'status'], 'safe'],

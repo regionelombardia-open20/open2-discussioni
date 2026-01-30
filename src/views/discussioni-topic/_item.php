@@ -46,8 +46,8 @@ $viewUrl = $model->getFullViewUrl();
                     <div class="generic-info flexbox m-b-10 col-md-12 col-xs-12 ">                       
                         <div class="post-title">
                             <?= Html::a(
-                                Html::tag('h4', $discussionTitle, [
-                                    'class' => 'no-margin'
+                                Html::tag('div', $discussionTitle, [
+                                    'class' => 'no-margin title-discussion'
                                 ]),
                                 $viewUrl,
                                 ['class' => 'link-list-title']

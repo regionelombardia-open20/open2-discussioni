@@ -870,5 +870,33 @@ class DiscussioniTopic extends DiscussioniTopicBase implements ContentModelInter
         return false;
     }
 
+    /**
+     * Check if module comments supports moderation
+     * @return false
+     */
+    public function checkCommentsModeration()
+    {
+        $moduleComments = \Yii::$app->getModule('comments');
+        if ($moduleComments) {
+            if (method_exists($moduleComments, 'checkModerationStatus')) {
+                return $moduleComments->checkModerationStatus($this);
+            }
+        }
+
+        return false;
+    }
+
+
+    /**
+     * If true, can render CommentsBellNotificationWidget.
+     * @return bool
+     */
+    public function canShowCommentsNotificationBellWidget()
+    {
+        /** @var \open20\amos\comments\AmosComments $moduleComments */
+        $moduleComments = Yii::$app->getModule('comments');
+
+        return $moduleComments && class_exists('open20\amos\comments\widgets\CommentsBellNotificationWidget');
+    }
 
 }

@@ -51,7 +51,10 @@ class WidgetIconDiscussioniDashboard extends WidgetIcon
         $this->setLabel(AmosDiscussioni::tHtml('amosdiscussioni', 'Discussioni'));
         $this->setDescription(AmosDiscussioni::t('amosdiscussioni', 'Modulo discussioni'));
 
-        if (!empty(Yii::$app->params['dashboardEngine']) && Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
+        if(!empty(Yii::$app->params['twoColorIcons'])){
+            $this->setIconFramework(AmosIcons::TWOTONES);
+            $this->setIcon('chat');
+        }else if (!empty(Yii::$app->params['dashboardEngine']) && Yii::$app->params['dashboardEngine'] == WidgetAbstract::ENGINE_ROWS) {
             $this->setIconFramework(AmosIcons::IC);
             $this->setIcon('disc');
             $paramsClassSpan = [];

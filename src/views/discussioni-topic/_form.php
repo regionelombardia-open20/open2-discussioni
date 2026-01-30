@@ -12,12 +12,14 @@
 use open20\amos\attachments\components\AttachmentsInput;
 use open20\amos\attachments\components\AttachmentsList;
 use open20\amos\attachments\components\CropInput;
+use open20\amos\comments\AmosComments;
 use open20\amos\core\forms\AccordionWidget;
 use open20\amos\core\forms\ActiveForm;
 use open20\amos\core\forms\CreatedUpdatedWidget;
 use open20\amos\core\forms\editors\Select;
 use open20\amos\core\forms\TextEditorWidget;
 use open20\amos\core\helpers\Html;
+use open20\amos\core\module\BaseAmosModule;
 use open20\amos\cwh\widgets\DestinatariPlusTagWidget;
 use open20\amos\discussioni\AmosDiscussioni;
 use open20\amos\discussioni\models\DiscussioniTopic;
@@ -26,7 +28,7 @@ use open20\amos\report\widgets\ReportFlagWidget;
 use open20\amos\seo\widgets\SeoWidget;
 use open20\amos\workflow\widgets\WorkflowTransitionButtonsWidget;
 use open20\amos\workflow\widgets\WorkflowTransitionStateDescriptorWidget;
-
+use kartik\widgets\SwitchInput;
 use yii\web\View;
 use yii\widgets\ActiveForm as ActiveForm2;
 
@@ -50,6 +52,36 @@ $hideSeoModuleClass = $module->hideSeoModule ? ' hidden' : '';
 $form = ActiveForm::begin([
     'options' => ['enctype' => 'multipart/form-data'] // important
 ]);
+
+/** @var AmosComments $moduleComments */
+$moduleComments = \Yii::$app->getModule('comments');
+// Comments moderation
+$showModeration = !$model->isNewRecord && $moduleComments && $model->checkCommentsModeration();
+if ($showModeration) {
+    $moderationValue = $moduleComments->getContextModerationValue($model->modelClassName, $model->id);
+    // Modal confirm moderation
+    echo $this->render('@vendor/open20/amos-comments/src/views/comment-dashboard/parts/_modal');
+
+    $jsSwitchInputChange = <<<JS
+    function switchInputChange(e, state) {
+        var value = e.target.checked;
+        var modal = $('.modal-comments-moderation');
+        var confirmBtn = $('.modal-comments-moderation #modalConfirmBtn');
+        var switchInput = $(this);
+        var moderationValue = '{$moderationValue}';
+        
+        if (state === false && moderationValue == true) {
+            switchInput.bootstrapSwitch('state', !state, true);
+            modal.modal('show');
+            confirmBtn.on('click', function (e) {
+                switchInput.bootstrapSwitch('state', state, true);
+                modal.modal('hide');
+            });
+        }
+    }
+JS;
+}
+
 ?>
 
 <?php if (!$model->isNewRecord) : ?>
@@ -131,78 +163,74 @@ $form = ActiveForm::begin([
 
     <div class="row">
         <div class="col-xs-12 section-form">
-        <div class="section-modalita-pubblicazione">
-            <?= Html::tag('h2', AmosDiscussioni::t('amosdiscussioni', '#settings_receiver_title'), ['class' => 'subtitle-form']) ?>
-            <div class="row">
-                        <div class="col-xs-12">
-                            <div class="content-mod-pubb">
-            <?php
+            <div class="section-modalita-pubblicazione">
+                <?= Html::tag('h2', AmosDiscussioni::t('amosdiscussioni', '#settings_receiver_title'), ['class' => 'subtitle-form']) ?>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="content-mod-pubb">
+                            <?php
 
-            $showReceiverSection = false;
+                            $showReceiverSection = false;
 
-            $moduleCwh = Yii::$app->getModule('cwh');
-            $showReceiverSection = isset($moduleCwh) ? true : null;
-            $scope = null;
-            if (!empty($moduleCwh)) {
-                $scope = $moduleCwh->getCwhScope();
-            }
+                            $moduleCwh = Yii::$app->getModule('cwh');
+                            $showReceiverSection = isset($moduleCwh) ? true : null;
+                            $scope = null;
+                            if (!empty($moduleCwh)) {
+                                $scope = $moduleCwh->getCwhScope();
+                            }
 
-            $moduleTag = Yii::$app->getModule('tag');
-            $showReceiverSection = isset($moduleTag) ? true : null;
+                            $moduleTag = Yii::$app->getModule('tag');
+                            $showReceiverSection = isset($moduleTag) ? true : null;
 
-            if ($showReceiverSection) : ?>
-                <div>
-                    <?= DestinatariPlusTagWidget::widget([
-                        'model' => $model,
-                        'moduleCwh' => $moduleCwh,
-                        'scope' => $scope
-                    ]);
-                    ?>
-                </div>
-            <?php endif; ?>
-                            </div>
-                        </div>
-            <?php if (AmosDiscussioni::instance()->enable_foreground && Yii::$app->user->can(AmosDiscussioni::instance()->foreground_permission)) : ?>
-                <div class="col-xs-12">
-                    <div class="row">
-                        <h3 class="subtitle-section-form"><?= AmosNews::t('amosdiscussioni', "#pubblication_on_portal") ?>
-                            <em>(<?= AmosNews::t('amosdiscussioni', "#choose_publish_on_portal") ?>)</em>
-                        </h3>
-                        <div class="col-md-6">
-                            <?php if ($model->isNewRecord) {
-                                $model->primo_piano = false;
-                            } ?>
-                            <?= $form->field($model, 'primo_piano')->widget(Select::className(),
-                                [
-                                    'data' => Html::getBooleanFieldsValues(),
-                                    'hideSearch' => true
-                                ]
-                            );
-                            ?>
-                        </div>
-                        <div class="col-md-6">
-                            <?php if (AmosDiscussioni::instance()->site_publish_enabled) : ?>
-                                <?=
-                                $form->field($model, 'in_evidenza')->widget(Select::className(), [
-                                    'auto_fill' => true,
-                                    'data' => Html::getBooleanFieldsValues(),
-                                    'options' => [
-                                        'prompt' => AmosDiscussioni::t('amosnews', 'Seleziona'),
-                                        // 'disabled' => ($model->primo_piano == 1 ? false : true)
-                                    ]
-                                ]);
-                                ?>
+                            if ($showReceiverSection) : ?>
+                                <div>
+                                    <?= DestinatariPlusTagWidget::widget([
+                                        'model' => $model,
+                                        'moduleCwh' => $moduleCwh,
+                                        'scope' => $scope
+                                    ]);
+                                    ?>
+                                </div>
                             <?php endif; ?>
                         </div>
                     </div>
+                    <?php if (AmosDiscussioni::instance()->enable_foreground && Yii::$app->user->can(AmosDiscussioni::instance()->foreground_permission)) : ?>
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <h3 class="subtitle-section-form"><?= AmosNews::t('amosdiscussioni', "#pubblication_on_portal") ?>
+                                    <em>(<?= AmosNews::t('amosdiscussioni', "#choose_publish_on_portal") ?>)</em>
+                                </h3>
+                                <div class="col-md-6">
+                                    <?php if ($model->isNewRecord) {
+                                        $model->primo_piano = false;
+                                    } ?>
+                                    <?= $form->field($model, 'primo_piano')->widget(Select::className(),
+                                        [
+                                            'data' => Html::getBooleanFieldsValues(),
+                                            'hideSearch' => true
+                                        ]
+                                    );
+                                    ?>
+                                </div>
+                                <div class="col-md-6">
+                                    <?php if (AmosDiscussioni::instance()->site_publish_enabled) : ?>
+                                        <?=
+                                        $form->field($model, 'in_evidenza')->widget(Select::className(), [
+                                            'auto_fill' => true,
+                                            'data' => Html::getBooleanFieldsValues(),
+                                            'options' => [
+                                                'prompt' => AmosDiscussioni::t('amosnews', 'Seleziona'),
+                                                // 'disabled' => ($model->primo_piano == 1 ? false : true)
+                                            ]
+                                        ]);
+                                        ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
             </div>
-        </div>
-        </div>
-
-        <div class="col-xs-12 note_asterisk">
-            <span><?= AmosDiscussioni::t('amosdiscussioni', '#required_field') ?></span>
         </div>
 
         <?php
@@ -236,32 +264,78 @@ $form = ActiveForm::begin([
         <?php endif; ?>
     </div>
 
+    <?php
+    if ($showModeration) { ?>
+        <div class="row">
+            <div class="col-xs-12 section-form">
+
+                <h2 class="subtitle-form"><?= AmosComments::t('amoscomments', 'Commenti') ?></h2>
+
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="subcommunity-section">
+                            <div class="row">
+                                <div class="col-xs-10 form-group m-b-0">
+                                    <?= Html::label(
+                                        AmosComments::t('amoscomments', 'Attiva la moderazione dei commenti'),
+                                        'comments_moderation',
+                                        ['class' => 'control-label m-t-15']
+                                    ); ?>
+                                </div>
+                                <div class="col-xs-2">
+                                    <?= SwitchInput::widget([
+                                        'name' => 'comments_moderation',
+                                        'pluginOptions' => [
+                                            'onColor' => 'success',
+                                            'onText' => BaseAmosModule::t('amoscore', 'Sì'),
+                                            'offText' => BaseAmosModule::t('amoscore', 'No'),
+                                        ],
+                                        'value' => $moderationValue,
+                                        'id' => 'comments_moderation',
+                                        'pluginEvents' => [
+                                            "switchChange.bootstrapSwitch" => new \yii\web\JsExpression($jsSwitchInputChange),
+                                        ]
+                                    ]); ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    <?php } ?>
+
     <div class="row">
         <?php if (isset($moduleSeo)) : ?>
-        <div class="col-xs-12<?= $hideSeoModuleClass ?>">
-        <?= AccordionWidget::widget([
-            'items' => [
-                [
-                    'header' => AmosDiscussioni::t('amosdiscussioni', '#settings_seo_title'),
-                    'content' => SeoWidget::widget([
-                        'contentModel' => $model,
-                        ]),
-                    ]
-                ],
-                'headerOptions' => ['tag' => 'h2'],
-                'options' =>  Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
-                'clientOptions' => [
-                    'collapsible' => true,
-                    'active' => 'false',
-                    'icons' => [
-                        'header' => 'ui-icon-amos am am-plus-square',
-                        'activeHeader' => 'ui-icon-amos am am-minus-square',
-                    ]
-                ],
-            ]);
-            ?>
-        </div>
+            <div class="col-xs-12<?= $hideSeoModuleClass ?>">
+                <?= AccordionWidget::widget([
+                    'items' => [
+                        [
+                            'header' => AmosDiscussioni::t('amosdiscussioni', '#settings_seo_title'),
+                            'content' => SeoWidget::widget([
+                                'contentModel' => $model,
+                            ]),
+                        ]
+                    ],
+                    'headerOptions' => ['tag' => 'h2'],
+                    'options' => Yii::$app->user->can('ADMIN') ? [] : ['style' => 'display:none;'],
+                    'clientOptions' => [
+                        'collapsible' => true,
+                        'active' => 'false',
+                        'icons' => [
+                            'header' => 'ui-icon-amos am am-plus-square',
+                            'activeHeader' => 'ui-icon-amos am am-minus-square',
+                        ]
+                    ],
+                ]);
+                ?>
+            </div>
         <?php endif; ?>
+
+        <div class="col-xs-12 note_asterisk">
+            <span><?= AmosDiscussioni::t('amosdiscussioni', '#required_field') ?></span>
+        </div>
 
         <?php
         $config = [

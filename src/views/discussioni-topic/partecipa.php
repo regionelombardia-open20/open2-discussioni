@@ -52,16 +52,41 @@ $reportModule = Yii::$app->getModule('report');
 <div class="discussioni-topic-view detail-discussion row">
     <!--parte sx-->
     <div class="col-sm-12">
-        <div class="flexbox first-info">
+        <div class="first-info">
             <div class="info-container m-b-20">
-                <?= ItemAndCardHeaderWidget::widget([
-                    'model' => $model,
-                    'publicationDateField' => 'created_at',
-                    'showPrevalentPartnershipAndTargets' => true,
-                    'absoluteUrlAvatar' => true,
-                ]) ?>
-                <small><?= AmosDiscussioni::t('amosdiscussioni', '#published_at'); ?> <?= Yii::$app->formatter->asDatetime($model->created_at, 'humanalwaysdatetime') ?></small><br>
-                <small><?= AmosDiscussioni::t('amosdiscussioni', '#last_update'); ?>: <?= Yii::$app->formatter->asDatetime($model->updated_at) ?> </small>
+                <div>
+                    <?= ItemAndCardHeaderWidget::widget([
+                        'model' => $model,
+                        'publicationDateField' => 'created_at',
+                        'showPrevalentPartnershipAndTargets' => true,
+                        'absoluteUrlAvatar' => true,
+                    ]) ?>
+                    <div>
+                        <small><?= AmosDiscussioni::t('amosdiscussioni', '#published_at'); ?> <?= Yii::$app->formatter->asDatetime($model->created_at, 'humanalwaysdatetime') ?></small><br>
+                        <small><?= AmosDiscussioni::t('amosdiscussioni', '#last_update'); ?>: <?= Yii::$app->formatter->asDatetime($model->updated_at) ?> </small>
+                    </div>
+                </div>
+                <div class="more-info-content">
+                    <?php
+                    if ($model->canShowCommentsNotificationBellWidget()) {
+                        // Comments notification bell widget
+                        echo \open20\amos\comments\widgets\CommentsBellNotificationWidget::widget([
+                            'modelClassname' => $model->modelClassName,
+                            'modelId' => $model->id,
+                        ]);
+                    } ?>
+
+                    <div class="m-l-10">
+                        <?= ContextMenuWidget::widget([
+                            'model' => $model,
+                            'actionModify' => "/discussioni/discussioni-topic/update?id=" . $model->id,
+                            'actionDelete' => "/discussioni/discussioni-topic/delete?id=" . $model->id,
+                            'labelDeleteConfirm' => AmosDiscussioni::t('amosdiscussioni', '#ask_confirm_to_cancel_discussion'),
+                            'modelValidatePermission' => 'DiscussionValidate'
+                        ]) ?>
+                    </div>
+
+                </div>
             </div>
 
             <!--< ?= CreatedUpdatedWidget::widget(['model' => $model, 'isTooltip' => true]) ?>
@@ -74,23 +99,17 @@ $reportModule = Yii::$app->getModule('report');
             $url = '/img/img_default.jpg';
             if (!is_null($model->discussionsTopicImage)) {
                 $url = $model->discussionsTopicImage->getWebUrl('original', false, true);
-                ?>
+            ?>
                 <?= Html::img($url, [
                     'class' => 'img-responsive img-discussione',
                     'alt' => AmosDiscussioni::t('amosdiscussioni', 'Immagine della discussione')
                 ]); ?>
-                <?php
+            <?php
             }
             ?>
-            <div>
-                <?= ContextMenuWidget::widget([
-                    'model' => $model,
-                    'actionModify' => "/discussioni/discussioni-topic/update?id=" . $model->id,
-                    'actionDelete' => "/discussioni/discussioni-topic/delete?id=" . $model->id,
-                    'labelDeleteConfirm' => AmosDiscussioni::t('amosdiscussioni', '#ask_confirm_to_cancel_discussion'),
-                    'modelValidatePermission' => 'DiscussionValidate'
-                ]) ?>
-            </div>
+
+
+
         </div>
         <div class="second-info m-t-20">
             <?= $model->testo ?>
@@ -107,7 +126,7 @@ $reportModule = Yii::$app->getModule('report');
             'viewFilesCounter' => true,
         ]);
         ?>
-        
+
         <?= AttachmentsList::widget([
             'model' => $model,
             'attribute' => 'discussionsAttachments',
@@ -133,7 +152,7 @@ $reportModule = Yii::$app->getModule('report');
                     'model' => $model,
                 ]);
                 ?>
-                <?php if (!$discussioniModule->disableReportFlag && !is_null($reportModule) && in_array($discussioniModule->model('DiscussioniTopic'), $reportModule->modelsEnabled)): ?>
+                <?php if (!$discussioniModule->disableReportFlag && !is_null($reportModule) && in_array($discussioniModule->model('DiscussioniTopic'), $reportModule->modelsEnabled)) : ?>
                     <?= \open20\amos\report\widgets\ReportDropdownWidget::widget([
                         'model' => $model,
                     ])

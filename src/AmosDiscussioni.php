@@ -129,6 +129,24 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
      * @var bool $disableBefeControllerRules Enable this property to disable the BEFE rules in controller behaviors.
      */
     public $disableBefeControllerRules = false;
+
+    /**
+     * Enable download in console with plugin open20/taskmanager instead of standard download with ExportMenu.
+     * Useful if you have a lot of data to download and ExportMenu goes in timeout.
+     * In order to work, you have to install open20/taskmanager plugin
+     * and configure $backgroundDownloadOptions array param if you need to change options.
+     * @var bool $enableBackgroundDownload
+     */
+    public $enableBackgroundDownload = false;
+
+    /**
+     * Options for background download.
+     * @var array $backgroundDownloadOptions
+     */
+    public $backgroundDownloadOptions = [
+        'exportAction' => '/discussioni/discussioni-topic/extract-discussioni-topic',
+        'redirectUrl' => '/taskmanager',
+    ];
     
     /**
      * @param \yii\base\Application $app
@@ -154,20 +172,14 @@ class AmosDiscussioni extends AmosModule implements ModuleInterface, SearchModul
     public function init()
     {
         parent::init();
-        
-        if (\Yii::$app instanceof Application) {
-            \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/commands', __DIR__ . '/commands/');
-            \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
-            //aggiunge le configurazioni trovate nel file config/config.php
-            // Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
-            $config = require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php');
-            \Yii::configure($this, ArrayHelper::merge($config, $this));
-        } else {
-            \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
-            //aggiunge le configurazioni trovate nel file config/config.php
-            // Yii::configure($this, require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php'));
-            $config = require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php');
-            \Yii::configure($this, ArrayHelper::merge($config, $this));
+
+        \Yii::setAlias('@open20/amos/' . static::getModuleName() . '/controllers', __DIR__ . '/controllers/');
+        //aggiunge le configurazioni trovate nel file config/config.php
+        $config = require(__DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php');
+        \Yii::configure($this, ArrayHelper::merge($config, $this));
+
+        if (\Yii::$app instanceof \yii\console\Application) {
+            $this->controllerNamespace = 'open20\amos\discussioni\commands\controllers';
         }
     }
     

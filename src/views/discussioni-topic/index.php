@@ -14,10 +14,11 @@ use open20\amos\core\icons\AmosIcons;
 use open20\amos\core\utilities\ModalUtility;
 use open20\amos\core\views\DataProviderView;
 use open20\amos\discussioni\AmosDiscussioni;
+use open20\amos\discussioni\controllers\DiscussioniTopicController;
 use open20\amos\discussioni\models\DiscussioniTopic;
 use open20\amos\discussioni\widgets\DiscussionsCarouselWidget;
 use open20\amos\cwh\utility\CwhUtil;
-
+use open20\amos\admin\AmosAdmin;
 
 /**
  * @var yii\web\View $this
@@ -25,56 +26,57 @@ use open20\amos\cwh\utility\CwhUtil;
  * @var open20\amos\discussioni\models\search\DiscussioniTopicSearch $model
  * @var string $currentView
  */
-
-
 $actionColumnDefault = '{partecipa} {update} {delete}';
 $actionColumnToValidate = '{validate}{reject}';
 $actionColumn = $actionColumnDefault;
 if (Yii::$app->controller->action->id == 'to-validate-discussions') {
     $actionColumn = $actionColumnToValidate . $actionColumnDefault;
     //cta:tutte
-    $this->title =[
+    $this->title = [
         //GESTIONE TITOLO
         'titleSection' => 'Discussioni da validare',
         //GESTIONE CTA
         'labelCta' => 'Tutte le discussioni', //tutte o di mio interesse
         'titleCta' => 'Visualizza la lista delle discussioni', //tutte o di mio interesse
-        'linkCta' =>'/discussioni/discussioni-topic/all-discussions', //tutte o di mio interesse
+        'linkCta' => '/discussioni/discussioni-topic/all-discussions', //tutte o di mio interesse
         //GESTIONE +
         'labelCreate' => 'Nuova',
         'titleCreate' => 'Crea una nuova discussione',
-        'linkCreate' =>'/discussioni/discussioni-topic/create',
+        'linkCreate' => '/discussioni/discussioni-topic/create',
         //GESTIONE MANAGE
         'labelManage' => 'Gestisci',
-        'titleManage' =>'Gestisci le discussioni',
+        'titleManage' => 'Gestisci le discussioni',
         'linkManage' => '#',
     ];
 }
 
+/** @var AmosDiscussioni $module */
 $module = \Yii::$app->getModule('discussioni');
+
+/** @var DiscussioniTopicController $appController */
+$appController = Yii::$app->controller;
 ?>
 
 <div class="discussions-topic-index">
 
-<!-- FILTRI RICERCA DA GRAFICARE -->
+    <!-- FILTRI RICERCA DA GRAFICARE -->
 
-<div>
-<?= $model->titolo ?>
-<?= $model->testo ?>
-<?php if(!is_null($model->created_by)) {
-			$creator = \open20\amos\core\user\User::findOne($model->created_by);
-			if(!empty($creator)) {
-				echo $creator->getProfile()->getNomeCognome();
-			}
-	   } ?>
-<?= (!empty($model->created_at)? \Yii::$app->getFormatter()->asDate($model->created_at) : '') ?>
-<?= (!empty($model->updated_at)? \Yii::$app->getFormatter()->asDate($model->updated_at) : '')?>
-<?= CwhUtil::getTagNames($model->tagValues); ?>
-</div>
-
-<!--FILRI RICERCA -->
+    <div>
 <?php
+if (!is_null($model->created_by)) {
+    $creator = \open20\amos\core\user\User::findOne($model->created_by);
+    if (!empty($creator)) {
+        echo $creator->getProfile()->getNomeCognome();
+    }
+}
+?>
+        <?= (!empty($model->created_at) ? \Yii::$app->getFormatter()->asDate($model->created_at) : '') ?>
+        <?= (!empty($model->updated_at) ? \Yii::$app->getFormatter()->asDate($model->updated_at) : '') ?>
+        <?= CwhUtil::getTagNames($model->tagValues); ?>
+    </div>
 
+    <!--FILRI RICERCA -->
+<?php
 echo $this->render('_search', [
     'model' => $model,
     'originAction' => Yii::$app->controller->action->id
@@ -90,7 +92,7 @@ $columns = array();
 $columns = [
     'immagine' => [
         'label' => AmosDiscussioni::t('amosdiscussioni', 'Immagine'),
-        'format' => 'html',
+        'format' => 'raw',
         'value' => function ($model) {
             /** @var DiscussioniTopic $model */
             $url = '/img/img_default.jpg';
@@ -98,8 +100,8 @@ $columns = [
                 $url = $model->discussionsTopicImage->getUrl('square_small', false, true);
             }
             $contentImage = Html::img(
-                    $url,
-                    ['class' => 'gridview-image', 'alt' => AmosDiscussioni::t('amosdiscussioni', 'Immagine della discussione')]
+                            $url,
+                            ['class' => 'gridview-image', 'alt' => AmosDiscussioni::t('amosdiscussioni', 'Immagine della discussione')]
             );
 
             return Html::a($contentImage, $model->getFullViewUrl());
@@ -115,11 +117,11 @@ $columns = [
 
             return Html::a(
                     $nomeCognome,
-                    ['/admin/user-profile/view', 'id' => $pubblicatoDa->id],
+                    ['/' . AmosAdmin::getModuleName() . '/user-profile/view', 'id' => $pubblicatoDa->id],
                     [
                         'title' => AmosDiscussioni::t(
-                            'amosnews', 'Apri il profilo di {nome_profilo}',
-                            ['nome_profilo' => $nomeCognome]
+                                'amosnews', 'Apri il profilo di {nome_profilo}',
+                                ['nome_profilo' => $nomeCognome]
                         )
                     ]
             );
@@ -170,7 +172,7 @@ $columns = [
         }
     ],
 ];
-        
+
 if ((isset($module->disableComments) && $module->disableComments)) {
     $columns['close_comment_thread'] = [
         'label' => AmosDiscussioni::t('amosdiscussioni', '#discussion_closed_list'),
@@ -188,17 +190,16 @@ $columns [] = [
     'buttons' => [
         'validate' => function ($url, $model) {
             /** @var DiscussioniTopic $model */
-            
             if (Yii::$app->getUser()->can('DiscussionValidate', ['model' => $model])) {
                 return ModalUtility::addConfirmRejectWithModal([
-                    'modalId' => 'validate-discussion-topic-modal-id-' . $model->id,
-                    'modalDescriptionText' => AmosDiscussioni::t('amosdiscussioni', '#VALIDATE_DISCUSSION_MODAL_TEXT'),
-                    'btnText' => AmosIcons::show('check-circle', ['class' => '']),
-                    'btnLink' => Yii::$app->urlManager->createUrl([
-                        '/discussioni/discussioni-topic/validate-discussion', 
-                        'id' => $model->id
-                    ]),
-                    'btnOptions' => ['title' => AmosDiscussioni::t('amosdiscussioni', 'Publish'), 'class' => 'btn btn-tools-secondary']
+                            'modalId' => 'validate-discussion-topic-modal-id-' . $model->id,
+                            'modalDescriptionText' => AmosDiscussioni::t('amosdiscussioni', '#VALIDATE_DISCUSSION_MODAL_TEXT'),
+                            'btnText' => AmosIcons::show('check-circle', ['class' => '']),
+                            'btnLink' => Yii::$app->urlManager->createUrl([
+                                '/discussioni/discussioni-topic/validate-discussion',
+                                'id' => $model->id
+                            ]),
+                            'btnOptions' => ['title' => AmosDiscussioni::t('amosdiscussioni', 'Publish'), 'class' => 'btn btn-tools-secondary']
                 ]);
             }
         },
@@ -206,45 +207,45 @@ $columns [] = [
             /** @var DiscussioniTopic $model */
             if (Yii::$app->getUser()->can('DiscussionValidate', ['model' => $model])) {
                 return ModalUtility::addConfirmRejectWithModal([
-                    'modalId' => 'reject-discussion-topic-modal-id-' . $model->id,
-                    'modalDescriptionText' => AmosDiscussioni::t('amosdiscussioni', '#REJECT_DISCUSSION_MODAL_TEXT'),
-                    'btnText' => AmosIcons::show('minus-circle', ['class' => '']),
-                    'btnLink' => Yii::$app->urlManager->createUrl([
-                        '/discussioni/discussioni-topic/reject-discussion', 
-                        'id' => $model->id
-                    ]),
-                    'btnOptions' => ['title' => AmosDiscussioni::t('amosdiscussioni', 'Reject'), 'class' => 'btn btn-tools-secondary']
+                            'modalId' => 'reject-discussion-topic-modal-id-' . $model->id,
+                            'modalDescriptionText' => AmosDiscussioni::t('amosdiscussioni', '#REJECT_DISCUSSION_MODAL_TEXT'),
+                            'btnText' => AmosIcons::show('minus-circle', ['class' => '']),
+                            'btnLink' => Yii::$app->urlManager->createUrl([
+                                '/discussioni/discussioni-topic/reject-discussion',
+                                'id' => $model->id
+                            ]),
+                            'btnOptions' => ['title' => AmosDiscussioni::t('amosdiscussioni', 'Reject'), 'class' => 'btn btn-tools-secondary']
                 ]);
             }
         },
         'partecipa' => function ($url, $model, $key) {
             /** @var DiscussioniTopic $model */
             return Html::a(
-                AmosIcons::show('comment'),
-                [$url],
-                ['class' => 'btn btn-tool-secondary', 'title' => AmosDiscussioni::t('amosdiscussioni', 'Partecipa')]
+                    AmosIcons::show('comment'),
+                    [$url],
+                    ['class' => 'btn btn-tool-secondary', 'title' => AmosDiscussioni::t('amosdiscussioni', 'Partecipa')]
             );
         },
         'update' => function ($url, $model) {
             if (Yii::$app->user->can('DISCUSSIONITOPIC_UPDATE', ['model' => $model])) {
                 $action = '/discussioni/discussioni-topic/update?id=' . $model->id;
                 $options = \open20\amos\core\utilities\ModalUtility::getBackToEditPopup(
-                    $model,
-                    'DiscussionValidate',
-                    $action,
-                    ['class' => 'btn btn-tools-secondary', 'title' => Yii::t('amoscore', 'Modifica'), 'data-pjax' => '0']
+                                $model,
+                                'DiscussionValidate',
+                                $action,
+                                ['class' => 'btn btn-tools-secondary', 'title' => Yii::t('amoscore', 'Modifica'), 'data-pjax' => '0']
                 );
 
                 return Html::a(
-                    \open20\amos\core\icons\AmosIcons::show('edit'),
-                    $action,
-                    $options
+                                \open20\amos\core\icons\AmosIcons::show('edit'),
+                                $action,
+                                $options
                 );
             }
         }
     ]
 ];
-    
+
 echo DataProviderView::widget([
     'dataProvider' => $dataProvider,
     'currentView' => $currentView,
@@ -252,9 +253,15 @@ echo DataProviderView::widget([
         'columns' => $columns,
         'enableExport' => true
     ],
+    'exportConfig' => [
+        'exportEnabled' => true,
+        'exportColumns' => $appController->getExportColumns(),
+//        'noExportColumns' => ['immagine'],
+        'enableBackgroundDownload' => $module->enableBackgroundDownload,
+        'backgroundDownloadOptions' => $module->backgroundDownloadOptions,
+    ],
     'listView' => [
         'itemView' => '_item',
-        
     ],
     'iconView' => [
         'itemView' => '_icon'

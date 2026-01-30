@@ -11,6 +11,8 @@
 namespace open20\amos\discussioni\controllers;
 
 use open20\amos\admin\AmosAdmin;
+use open20\amos\admin\models\UserProfile;
+use open20\amos\comments\AmosComments;
 use open20\amos\core\controllers\CrudController;
 use open20\amos\core\helpers\Html;
 use open20\amos\core\helpers\PositionalBreadcrumbHelper;
@@ -58,6 +60,7 @@ class DiscussioniTopicController extends CrudController
                 'allow' => true,
                 'actions' => [
                     'partecipa',
+                    'extract-discussioni-topic',
                 ],
                 'roles' => [
                     'DISCUSSIONITOPIC_READ',
@@ -690,6 +693,13 @@ class DiscussioniTopicController extends CrudController
                 }
 
                 if ($this->model->save($validateOnSave)) {
+                    /** @var AmosComments $moduleComments */
+                    $moduleComments = \Yii::$app->getModule('comments');
+                    // Save comments moderation
+                    if ($this->model->checkCommentsModeration()) {
+                        $moduleComments->saveCommentModeration($this->model->modelClassName, $this->model->id);
+                    }
+
                     Yii::$app->getSession()->addFlash(
                         'success', AmosDiscussioni::t('amosdiscussioni', 'Discussione salvata con successo.')
                     );
@@ -737,8 +747,17 @@ class DiscussioniTopicController extends CrudController
 
             if ($model->validate()) {
                 if ($model->save()) {
+                    /** @var AmosComments $moduleComments */
+                    $moduleComments = \Yii::$app->getModule('comments');
+                    // Save comments moderation
+                    if ($this->model->checkCommentsModeration()) {
+                        $moderationValue = \Yii::$app->request->post('comments_moderation');
+                        $moduleComments->saveCommentModeration($this->model->modelClassName, $this->model->id, $moderationValue);
+                    }
+
                     Yii::$app->getSession()->addFlash('success',
                         AmosDiscussioni::t('amosdiscussioni', 'Modifiche salvate con successo.'));
+
                     return $this->redirectOnUpdate($model, $previousStatus);
                 } else {
                     Yii::$app->getSession()->addFlash('danger',
@@ -905,6 +924,124 @@ class DiscussioniTopicController extends CrudController
         if ($this->isContentShared($id)) {
             return $this->render('public', ['model' => $model]);
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function getExportColumns()
+    {
+        return [
+            'titolo',
+            [
+                'attribute' => 'created_by',
+                'label' => AmosDiscussioni::t('amosdiscussioni', 'Pubblicato Da'),
+                'value' => function ($model) {
+                    $pubblicatoDa = UserProfile::findOne(['user_id' => $model->created_by]);
+                    $nomeCognome = $pubblicatoDa->getNomeCognome();
+
+                    return Html::a(
+                        $nomeCognome,
+                        ['/'.AmosAdmin::getModuleName().'/user-profile/view', 'id' => $pubblicatoDa->id],
+                        [
+                            'title' => AmosDiscussioni::t(
+                                'amosnews', 'Apri il profilo di {nome_profilo}',
+                                ['nome_profilo' => $nomeCognome]
+                            )
+                        ]
+                    );
+                },
+                'format' => 'html'
+            ],
+            [
+                'attribute' => 'created_at',
+                'label' => AmosDiscussioni::t('amosdiscussioni', 'Data pubblicazione'),
+                'format' => 'datetime',
+            ],
+            'status' => [
+                'attribute' => 'status',
+                'value' => function ($model) {
+                    /** @var DiscussioniTopic $model */
+                    return $model->hasWorkflowStatus() ? $model->getWorkflowStatus()->getLabel() : '--';
+                }
+            ],
+            [
+                'label' => AmosDiscussioni::t('amosdiscussioni', 'Contributi'),
+                'value' => function ($model) {
+                    /** @var DiscussioniTopic $model */
+                    return $model->getDiscussionComments()->count();
+                }
+            ],
+            'hints',
+            [
+                'label' => AmosDiscussioni::t('amosdiscussioni', 'Partecipanti'),
+                'value' => function ($model) {
+                    /** @var DiscussioniTopic $model */
+                    $risposte = $model->getDiscussionComments();
+                    return $risposte->groupBy('created_by')->count();
+                }
+            ],
+            [
+                'label' => AmosDiscussioni::t('amosdiscussioni', 'Ultimo Commento/Risposta'),
+                'format' => 'html',
+                'value' => function ($model) {
+                    /** @var DiscussioniTopic $model */
+                    if ($model->lastCommentUser) {
+                        $ultima_risposta = $model->lastCommentUser->nome . ' ' . $model->lastCommentUser->cognome;
+                        $data = ' ' . PHP_EOL . Yii::$app->formatter->asDatetime($model->lastCommentDate);
+
+                        return $ultima_risposta . $data;
+                    }
+
+                    return AmosDiscussioni::t('amosdiscussioni', 'Non ci sono ancora contributi');
+                }
+            ],
+        ];
+    }
+
+    /**
+     * @return \yii\web\Response
+     */
+    public function actionExtractDiscussioniTopic()
+    {
+        $basePath = realpath(\Yii::getAlias('@vendor/../common/uploads/temp'));
+        $filename = "discussioni_export_" . date('Y_m_d_His') . ".xlsx";
+        $outputPath = $basePath . "/" . $filename;
+        $post = \Yii::$app->request->post();
+        $params = [];
+        $encryptionKey = Yii::$app->params['encryptionKey'];
+        if (empty($encryptionKey)) {
+            /** @var \open20\amos\layout\Module $moduleLayout */
+            $moduleLayout = Yii::$app->getModule('layout');
+            $encryptionKey = $moduleLayout->encryptionKey;
+        }
+
+        // Redirect url
+        if (!empty($post['redirectUrl'])) {
+            $redirectUrl = $post['redirectUrl'];
+        } else {
+            $redirectUrl = '/taskmanager';
+        }
+        // Query
+        if (!empty($post['query'])) {
+            $encryptedQuery = $post['query'];
+            $query = openssl_decrypt($encryptedQuery, 'aes-128-ecb', $encryptionKey);
+            if ($query) {
+                $params['query'] = $query;
+            }
+        }
+
+        /** @var \open20\amos\taskmanager\TaskManager $moduleTaskManager */
+        $moduleTaskManager = \Yii::$app->getModule('taskmanager');
+
+        $moduleTaskManager->scheduleJob(
+            "discussioni/export/export-discussioni-topic",
+            ucfirst($this->module::getModuleName()),
+            $outputPath,
+            $params
+        );
+
+        return $this->redirect([$redirectUrl]);
     }
 
     /**
