@@ -1,5 +1,6 @@
 {
     "name": "open20/amos-discussioni",
+    "license": "GPL-3.0-or-later",
     "description": "Sistema AMOS per le discussioni",
     "keywords": ["amos", "yii2", "discussioni"],
     "homepage": "http://www.example.com/",
